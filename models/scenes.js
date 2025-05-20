@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const propositionsSchema = mongoose.Schema({
+  usersId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   text: String,
   votes: Number,
 });
@@ -11,7 +12,7 @@ const scenesSchema = mongoose.Schema({
   sceneNumber: Number,
   text: String,
   voteWinner: String,
-  propositions: propositionsSchema
+  propositions: propositionsSchema,
 });
 
 const Scenes = mongoose.model("scenes", scenesSchema);
