@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const gamesSchema = mongoose.Schema({
  status: Boolean,
- code: Number,
+ code: String,
  title: String,
  genre: String,
  nbPlayers: Number,
