@@ -53,9 +53,22 @@ router.post("/signin", (req, res) => {
     }
   });
 });
-
-
-
-// ...existing code...
+router.post("/profile", (req, res) => {
+  if (!checkBody(req.body, ["token", "nickname", "avatar"])) {
+    res.json({ result: false, error: "Missing or empty fields" });
+    return;
+  }
+  User.findOne({ token: req.body.token }).then((user) => {
+    if (!user) {
+      res.json({ result: false, error: "User not found" });
+      return;
+    }
+      user.nickname = req.body.nickname;
+      user.avatar = req.body.avatar;
+      user.save().then(() => {
+        res.json({ result: true});
+      /* console.log(user)*/});
+    });
+  });
 
 module.exports = router;
