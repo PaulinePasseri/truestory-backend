@@ -58,6 +58,7 @@ router.post("/signin", (req, res) => {
     }
   });
 });
+
 router.put("/profile", (req, res) => {
   User.findOne({ token: req.body.token }).then((user) => {
     if (!user) {
@@ -65,28 +66,39 @@ router.put("/profile", (req, res) => {
       return;
     }
 
-    const photoPath = `./tmp/${uniqid()}.jpg`;
-    req.files.photoFromFront.mv(photoPath, (err) => {
-      if (err) {
-        res.json({ result: false, error: "File upload failed" });
-        return;
-      }
+    user.nickname = req.body.nickname;
 
-      cloudinary.uploader.upload(photoPath, (error, resultCloudinary) => {
-        fs.unlinkSync(photoPath); 
+    if (req.files && req.files.photoFromFront) {
+      const photoPath = `./tmp/${uniqid()}.jpg`;
 
-        if (error) {
-          res.json({ result: false, error: "Cloudinary upload failed" });
+      req.files.photoFromFront.mv(photoPath, (err) => {
+        if (err) {
+          res.json({ result: false, error: "File upload failed" });
           return;
         }
 
-        user.nickname = req.body.nickname;
-        user.avatar = resultCloudinary.secure_url;
-        user.save().then(() => {
-          res.json({ result: true, url: resultCloudinary.secure_url });
+        cloudinary.uploader.upload(photoPath, (error, resultCloudinary) => {
+          fs.unlinkSync(photoPath); 
+
+          if (error) {
+            res.json({ result: false, error: "Cloudinary upload failed" });
+            return;
+          }
+
+          user.avatar = resultCloudinary.secure_url;
+          user.save().then(() => {
+            res.json({ result: true, url: resultCloudinary.secure_url });
+          });
         });
       });
-    });
+    } else if (req.body.avatarUrl) {
+      user.avatar = req.body.avatarUrl;
+      user.save().then(() => {
+        res.json({ result: true, url: req.body.avatarUrl });
+      });
+    } else {
+      res.json({ result: false, error: "No image or avatar provided" });
+    }
   });
 });
 
