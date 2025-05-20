@@ -4,7 +4,6 @@ const usersSchema = mongoose.Schema({
   email: String,
   token: String,
   password: String,
-  username: String,
   nickname: String,
   avatar: String,
   scenesId: { type: mongoose.Schema.Types.ObjectId, ref: 'scenes' },
