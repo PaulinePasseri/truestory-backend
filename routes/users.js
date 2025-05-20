@@ -12,15 +12,15 @@ const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 
-
-
 router.post("/signup", (req, res) => {
   if (!checkBody(req.body, ["username", "email", "password"])) {
     res.json({ result: false, error: "Missing or empty fields" });
     return;
   }
 
-  User.findOne({ $or: [{ username: req.body.username }, { email: req.body.email }] }).then((data) => {
+  User.findOne({
+    $or: [{ username: req.body.username }, { email: req.body.email }],
+  }).then((data) => {
     if (data === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
 
@@ -63,12 +63,12 @@ router.post("/profile", (req, res) => {
       res.json({ result: false, error: "User not found" });
       return;
     }
-      user.nickname = req.body.nickname;
-      user.avatar = req.body.avatar;
-      user.save().then(() => {
-        res.json({ result: true});
-      /* console.log(user)*/});
+    user.nickname = req.body.nickname;
+    user.avatar = req.body.avatar;
+    user.save().then(() => {
+      res.json({ result: true });
     });
   });
+});
 
 module.exports = router;
