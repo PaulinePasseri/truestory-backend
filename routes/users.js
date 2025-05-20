@@ -59,15 +59,6 @@ router.post("/signin", (req, res) => {
   });
 });
 router.put("/profile", (req, res) => {
-  if (
-    !checkBody(req.body, ["token", "nickname"]) ||
-    !req.files ||
-    !req.files.photoFromFront
-  ) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
-  }
-
   User.findOne({ token: req.body.token }).then((user) => {
     if (!user) {
       res.json({ result: false, error: "User not found" });
