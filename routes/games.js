@@ -3,18 +3,23 @@ var router = express.Router();
 
 const Games = require("../models/games");
 const uid2 = require("uid2");
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
 
-// Route création de partie 
+// Route création de partie
 router.post("/create", (req, res) => {
+
   const newGames = new Games({
     status: true, // true si la partie est en cours
     code: uid2(5),
     title: req.body.title,
+    image: req.body.image,
     nbPlayers: req.body.nbPlayers,
     nbScenes: req.body.nbScenes,
     genre: req.body.genre,
     winner: null,
     usersId: null,
+
   });
 
   newGames.save().then((newDoc) => {
