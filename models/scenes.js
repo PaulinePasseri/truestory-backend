@@ -7,8 +7,8 @@ const propositionsSchema = mongoose.Schema({
 });
 
 const scenesSchema = mongoose.Schema({
+  game: { type: mongoose.Schema.Types.ObjectId, ref: "games" },
   status: Boolean,
-  game: String,
   sceneNumber: Number,
   text: String,
   voteWinner: String,
