@@ -1,9 +1,8 @@
 var express = require("express");
 var router = express.Router();
 
-require("../models/connection")
+require("../models/connection");
 const Scene = require("../models/scenes");
-
 
 router.post("/", (req, res) => {
   const { gameId, text } = req.body;
@@ -23,9 +22,12 @@ router.post("/", (req, res) => {
     res.json({ result: false, error: "Scene creation failed" });
   });
 });
+
 router.get("/:gameId", (req, res) => {
   Scene.find({ game: req.params.gameId }).then(data => {
-    res.json({ success: true, data });
+    res.json({ result: true, data });
+  }).catch(() => {
+    res.json({ result: false, error: "Scene récupération failed" });
   });
 });
 
