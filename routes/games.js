@@ -3,24 +3,24 @@ var router = express.Router();
 
 const Games = require("../models/games");
 const uid2 = require("uid2");
-const { checkBody } = require("../modules/checkBody");
 
-// Route création de partie (avec code, titre, nb joueurs, nb scènes, genre)
+// Route création de partie 
 router.post("/create", (req, res) => {
- 
-      const newGames = new Games({
-        code: uid2(5),
-        title: req.body.title,
-        nbPlayers: req.body.nbPlayers,
-        nbScenes: req.body.nbScenes,
-        genre: req.body.genre,
-      });
-
-      newGames.save().then((newDoc) => {
-        res.json({ result: true, code: newDoc.code });
-      });
+  const newGames = new Games({
+    status: true, // true si la partie est en cours
+    code: uid2(5),
+    title: req.body.title,
+    nbPlayers: req.body.nbPlayers,
+    nbScenes: req.body.nbScenes,
+    genre: req.body.genre,
+    winner: null,
+    usersId: null,
   });
 
+  newGames.save().then((newDoc) => {
+    res.json({ result: true, code: newDoc.code });
+  });
+});
 
 // Route récupération du code de la partie
 router.get("/game/:gamecode", (req, res) => {
@@ -60,6 +60,6 @@ router.get("/:user", (req, res) => {
       res.json({ result: false, error: "No games found" });
     }
   });
-}); 
+});
 
 module.exports = router;
