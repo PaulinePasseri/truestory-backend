@@ -6,17 +6,8 @@ const uid2 = require("uid2");
 const { checkBody } = require("../modules/checkBody");
 
 // Route création de partie (avec code, titre, nb joueurs, nb scènes, genre)
-router.post("/game", (req, res) => {
-  if (!checkBody(req.body, ["title", "nbPlayers", "nbScenes", "genre"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
-  }
-  Games.findOne({
-    $or: [
-      { title: req.body.title },
-    ],
-  }).then((data) => {
-    if (data === null) {
+router.post("/create", (req, res) => {
+ 
       const newGames = new Games({
         code: uid2(5),
         title: req.body.title,
@@ -28,11 +19,8 @@ router.post("/game", (req, res) => {
       newGames.save().then((newDoc) => {
         res.json({ result: true, code: newDoc.code });
       });
-    } else {
-      res.json({ result: false, error: "Game already exists" });
-    }
   });
-});
+
 
 // Route récupération du code de la partie
 router.get("/game/:gamecode", (req, res) => {
