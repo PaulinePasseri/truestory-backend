@@ -4,6 +4,7 @@ const gamesSchema = mongoose.Schema({
  status: Boolean,
  code: String,
  title: String,
+ image: String,
  genre: String,
  nbPlayers: Number,
  nbScenes: Number,

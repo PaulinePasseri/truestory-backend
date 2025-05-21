@@ -3,34 +3,27 @@ var router = express.Router();
 
 const Games = require("../models/games");
 const uid2 = require("uid2");
-const { checkBody } = require("../modules/checkBody");
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
 
-// Route création de partie (avec code, titre, nb joueurs, nb scènes, genre)
-router.post("/game", (req, res) => {
-  if (!checkBody(req.body, ["title", "nbPlayers", "nbScenes", "genre"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
-  }
-  Games.findOne({
-    $or: [
-      { title: req.body.title },
-    ],
-  }).then((data) => {
-    if (data === null) {
-      const newGames = new Games({
-        code: uid2(5),
-        title: req.body.title,
-        nbPlayers: req.body.nbPlayers,
-        nbScenes: req.body.nbScenes,
-        genre: req.body.genre,
-      });
+// Route création de partie
+router.post("/create", (req, res) => {
 
-      newGames.save().then((newDoc) => {
-        res.json({ result: true, code: newDoc.code });
-      });
-    } else {
-      res.json({ result: false, error: "Game already exists" });
-    }
+  const newGames = new Games({
+    status: true, // true si la partie est en cours
+    code: uid2(5),
+    title: req.body.title,
+    image: req.body.image,
+    nbPlayers: req.body.nbPlayers,
+    nbScenes: req.body.nbScenes,
+    genre: req.body.genre,
+    winner: null,
+    usersId: null,
+
+  });
+
+  newGames.save().then((newDoc) => {
+    res.json({ result: true, code: newDoc.code });
   });
 });
 
@@ -72,6 +65,6 @@ router.get("/:user", (req, res) => {
       res.json({ result: false, error: "No games found" });
     }
   });
-}); 
+});
 
 module.exports = router;
