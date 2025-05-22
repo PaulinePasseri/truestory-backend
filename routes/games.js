@@ -64,6 +64,26 @@ router.post("/join", (req, res) => {
   });
 });
 
+// Récupération des joueurs de la partie 
+router.get("/players/:gamecode", (req, res) => {
+  Games.findOne({ code: req.params.gamecode })
+    .populate("usersId")
+    .then((data) => {
+      if (data) {
+        res.json({
+          result: true,
+          players: data.usersId.map((user) => ({
+            id: user._id,
+            nickname: user.nickname,
+            avatar: user.avatar,
+          })),
+        });
+      } else {
+        res.json({ result: false, error: "No players found" });
+      }
+    });
+});
+
 // Route récupération des parties d'un utilisateur =>>>> (ne fonctonne actuellemnt pas, trouve toutes les parties)
 router.get("/:user", (req, res) => {
   Games.find({ userId: req.params.userId }).then((data) => {
