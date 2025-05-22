@@ -47,7 +47,12 @@ router.post("/signin", (req, res) => {
   }
   User.findOne({ email: req.body.email }).then((data) => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({ result: true, token: data.token, avatar: data.avatar, nickname: data.nickname });
+      res.json({
+        result: true,
+        token: data.token,
+        avatar: data.avatar,
+        nickname: data.nickname,
+      });
     } else {
       res.json({ result: false, error: "User not found or wrong password" });
     }
@@ -65,7 +70,10 @@ router.put("/profile", (req, res) => {
 
     if (req.files && req.files.photoFromFront) {
       const photoPath = `./tmp/${uniqid()}.jpg`;
-
+      const tmpDir = "./tmp";
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir);
+      }
       req.files.photoFromFront.mv(photoPath, (err) => {
         if (err) {
           res.json({ result: false, error: "File upload failed" });
@@ -73,7 +81,7 @@ router.put("/profile", (req, res) => {
         }
 
         cloudinary.uploader.upload(photoPath, (error, resultCloudinary) => {
-          fs.unlinkSync(photoPath); 
+          fs.unlinkSync(photoPath);
 
           if (error) {
             res.json({ result: false, error: "Cloudinary upload failed" });
