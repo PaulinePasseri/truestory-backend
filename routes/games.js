@@ -2,9 +2,8 @@ var express = require("express");
 var router = express.Router();
 
 const Games = require("../models/games");
+const User = require("../models/users");
 const uid2 = require("uid2");
-const cloudinary = require("cloudinary").v2;
-const fs = require("fs");
 
 // Route création de partie
 router.post("/create", (req, res) => {
@@ -21,7 +20,12 @@ router.post("/create", (req, res) => {
   });
 
   newGames.save().then((newDoc) => {
-    res.json({ result: true, code: newDoc.code, title: newDoc.title, genre: newDoc.genre });
+    res.json({
+      result: true,
+      code: newDoc.code,
+      title: newDoc.title,
+      genre: newDoc.genre,
+    });
   });
 });
 
@@ -48,23 +52,38 @@ router.get("/game/:gamecode", (req, res) => {
 
 // Ajout d'un joueur à une partie
 router.post("/join", (req, res) => {
-  const { code, userId } = req.body;
-  Games.findOne({ code }).populate('usersId').then((game) => {
-    if (game) {
-      if (game.usersId.length < game.nbPlayers) {
+  const { code, token } = req.body;
+
+  User.findOne({ token }).then((user) => {
+    if (!user) {
+      return res.json({ result: false, error: "Invalid token" });
+    }
+
+    const userId = user._id;
+
+    Games.findOne({ code })
+      .populate("usersId")
+      .then((game) => {
+        if (!game) {
+          return res.json({ result: false, error: "Game not found" });
+        }
+
+        if (game.usersId.length >= game.nbPlayers) {
+          return res.json({ result: false, error: "Game is full" });
+        }
+
+        if (game.usersId.some((u) => u._id.equals(userId))) {
+          return res.json({ result: false, error: "User already in game" });
+        }
+
         Games.updateOne({ code }, { $push: { usersId: userId } }).then(() => {
           res.json({ result: true, message: `User added to game`, game });
         });
-      } else {
-        res.json({ result: false, error: "Game is full" });
-      }
-    } else {
-      res.json({ result: false, error: "Game not found" });
-    }
+      });
   });
 });
 
-// Récupération des joueurs de la partie 
+// Récupération des joueurs de la partie
 router.get("/players/:gamecode", (req, res) => {
   Games.findOne({ code: req.params.gamecode })
     .populate("usersId")
@@ -84,24 +103,16 @@ router.get("/players/:gamecode", (req, res) => {
     });
 });
 
-// Route récupération des parties d'un utilisateur =>>>> (ne fonctonne actuellemnt pas, trouve toutes les parties)
-router.get("/:user", (req, res) => {
-  Games.find({ userId: req.params.userId }).then((data) => {
-    if (data) {
-      res.json({
-        result: true,
-        games: data.map((game) => ({
-          code: game.code,
-          title: game.title,
-          nbPlayers: game.nbPlayers,
-          nbScenes: game.nbScenes,
-          genre: game.genre,
-        })),
+// Route de récupération des parties d'un utilisateur via le token
+router.get("/user/:token", (req, res) => {
+  Games.find()
+    .populate("usersId")
+    .then((games) => {
+      const userGames = games.filter((game) => {
+        return game.usersId.some((user) => user.token === req.params.token);
       });
-    } else {
-      res.json({ result: false, error: "No games found" });
-    }
-  });
+      res.json({ result: true, games: userGames });
+    });
 });
 
 module.exports = router;
