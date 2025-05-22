@@ -8,7 +8,6 @@ const fs = require("fs");
 
 // Route création de partie
 router.post("/create", (req, res) => {
-
   const newGames = new Games({
     status: true, // true si la partie est en cours
     code: uid2(5),
@@ -18,12 +17,11 @@ router.post("/create", (req, res) => {
     nbScenes: req.body.nbScenes,
     genre: req.body.genre,
     winner: null,
-    usersId: null,
-
+    usersId: [],
   });
 
   newGames.save().then((newDoc) => {
-    res.json({ result: true, code: newDoc.code });
+    res.json({ result: true, code: newDoc.code, title: newDoc.title, genre: newDoc.genre });
   });
 });
 
@@ -39,6 +37,7 @@ router.get("/game/:gamecode", (req, res) => {
           nbPlayers: data.nbPlayers,
           nbScenes: data.nbScenes,
           genre: data.genre,
+          usersId: data.usersId,
         },
       });
     } else {
@@ -47,9 +46,27 @@ router.get("/game/:gamecode", (req, res) => {
   });
 });
 
+// Ajout d'un joueur à une partie
+router.post("/join", (req, res) => {
+  const { code, userId } = req.body;
+  Games.findOne({ code }).populate('usersId').then((game) => {
+    if (game) {
+      if (game.usersId.length < game.nbPlayers) {
+        Games.updateOne({ code }, { $push: { usersId: userId } }).then(() => {
+          res.json({ result: true, message: `User added to game`, game });
+        });
+      } else {
+        res.json({ result: false, error: "Game is full" });
+      }
+    } else {
+      res.json({ result: false, error: "Game not found" });
+    }
+  });
+});
+
 // Route récupération des parties d'un utilisateur =>>>> (ne fonctonne actuellemnt pas, trouve toutes les parties)
 router.get("/:user", (req, res) => {
-  Games.find({ usersId: req.params.userid }).then((data) => {
+  Games.find({ userId: req.params.userId }).then((data) => {
     if (data) {
       res.json({
         result: true,
