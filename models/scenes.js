@@ -12,7 +12,7 @@ const scenesSchema = mongoose.Schema({
   sceneNumber: Number,
   text: String,
   voteWinner: String,
-  propositions: propositionsSchema,
+  propositions: [propositionsSchema],
 });
 
 const Scenes = mongoose.model("scenes", scenesSchema);

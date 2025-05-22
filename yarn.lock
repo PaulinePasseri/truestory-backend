@@ -2,6 +2,24 @@
 # yarn lockfile v1
 
 
+"@huggingface/inference@^3.13.2":
+  version "3.13.2"
+  resolved "https://registry.yarnpkg.com/@huggingface/inference/-/inference-3.13.2.tgz#045af438af8a5fa426c755996a008847c1c8dfec"
+  integrity sha512-s9grNTO33FeBIvKg4KjnG3sTQWppGDTdQxtpaVqKtn2Hl24yKwc59TfwNAKDzW12aZrc9njYBPwA/Y/mxX/kew==
+  dependencies:
+    "@huggingface/jinja" "^0.5.0"
+    "@huggingface/tasks" "^0.19.6"
+
+"@huggingface/jinja@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@huggingface/jinja/-/jinja-0.5.0.tgz#0da65deb98798cd24ea42ad13f6df224ce23f443"
+  integrity sha512-Ptc03/jGRiYRoi0bUYKZ14MkDslsBRT24oxmsvUlfYrvQMldrxCevhPnT+hfX8awKTT8/f/0ZBBWldoeAcMHdQ==
+
+"@huggingface/tasks@^0.19.6":
+  version "0.19.8"
+  resolved "https://registry.yarnpkg.com/@huggingface/tasks/-/tasks-0.19.8.tgz#03627d2941ffe49fc6ba8321a6fe9898d4ebd236"
+  integrity sha512-gR88OvYQQ2zu1Dt/tfFRVWJRfsKCdssxJBb8bz3tVd9fh3rneNE/pjkaGyG3oT1VlHv7wEmrqrnkmMcXy8O0rg==
+
 "@mongodb-js/saslprep@^1.1.9":
   version "1.2.2"
   resolved "https://registry.npmjs.org/@mongodb-js/saslprep/-/saslprep-1.2.2.tgz"
