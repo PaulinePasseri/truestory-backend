@@ -6,25 +6,32 @@ const User = require("../models/users");
 const uid2 = require("uid2");
 
 // Route création de partie
-router.post("/create", (req, res) => {
-  const newGames = new Games({
-    status: true, // true si la partie est en cours
-    code: uid2(5),
-    title: req.body.title,
-    image: req.body.image,
-    nbPlayers: req.body.nbPlayers,
-    nbScenes: req.body.nbScenes,
-    genre: req.body.genre,
-    winner: null,
-    usersId: [],
-  });
+router.post("/create/:token", (req, res) => {
+  User.findOne({ token: req.params.token }).then((user) => {
+    if (!user) {
+      return res.json({ result: false, error: "Invalid token" });
+    }
 
-  newGames.save().then((newDoc) => {
-    res.json({
-      result: true,
-      code: newDoc.code,
-      title: newDoc.title,
-      genre: newDoc.genre,
+    const userId = user._id;
+    const newGames = new Games({
+      status: true, // true si la partie est en cours
+      code: uid2(5),
+      title: req.body.title,
+      image: req.body.image,
+      nbPlayers: req.body.nbPlayers,
+      nbScenes: req.body.nbScenes,
+      genre: req.body.genre,
+      winner: null,
+      usersId: [userId], // Ajout de l'utilisateur créateur de la partie
+    });
+  
+    newGames.save().then((newDoc) => {
+      res.json({
+        result: true,
+        code: newDoc.code,
+        title: newDoc.title,
+        genre: newDoc.genre,
+      });
     });
   });
 });
