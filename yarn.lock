@@ -2,9 +2,14 @@
 # yarn lockfile v1
 
 
+"@google/generative-ai@^0.24.1":
+  version "0.24.1"
+  resolved "https://registry.npmjs.org/@google/generative-ai/-/generative-ai-0.24.1.tgz"
+  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
+
 "@huggingface/inference@^3.13.2":
   version "3.13.2"
-  resolved "https://registry.yarnpkg.com/@huggingface/inference/-/inference-3.13.2.tgz#045af438af8a5fa426c755996a008847c1c8dfec"
+  resolved "https://registry.npmjs.org/@huggingface/inference/-/inference-3.13.2.tgz"
   integrity sha512-s9grNTO33FeBIvKg4KjnG3sTQWppGDTdQxtpaVqKtn2Hl24yKwc59TfwNAKDzW12aZrc9njYBPwA/Y/mxX/kew==
   dependencies:
     "@huggingface/jinja" "^0.5.0"
@@ -12,12 +17,12 @@
 
 "@huggingface/jinja@^0.5.0":
   version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@huggingface/jinja/-/jinja-0.5.0.tgz#0da65deb98798cd24ea42ad13f6df224ce23f443"
+  resolved "https://registry.npmjs.org/@huggingface/jinja/-/jinja-0.5.0.tgz"
   integrity sha512-Ptc03/jGRiYRoi0bUYKZ14MkDslsBRT24oxmsvUlfYrvQMldrxCevhPnT+hfX8awKTT8/f/0ZBBWldoeAcMHdQ==
 
 "@huggingface/tasks@^0.19.6":
   version "0.19.8"
-  resolved "https://registry.yarnpkg.com/@huggingface/tasks/-/tasks-0.19.8.tgz#03627d2941ffe49fc6ba8321a6fe9898d4ebd236"
+  resolved "https://registry.npmjs.org/@huggingface/tasks/-/tasks-0.19.8.tgz"
   integrity sha512-gR88OvYQQ2zu1Dt/tfFRVWJRfsKCdssxJBb8bz3tVd9fh3rneNE/pjkaGyG3oT1VlHv7wEmrqrnkmMcXy8O0rg==
 
 "@mongodb-js/saslprep@^1.1.9":
@@ -123,7 +128,7 @@ bson@^6.10.3:
 
 busboy@^1.6.0:
   version "1.6.0"
-  resolved "https://registry.yarnpkg.com/busboy/-/busboy-1.6.0.tgz#966ea36a9502e43cdb9146962523b92f531f6893"
+  resolved "https://registry.npmjs.org/busboy/-/busboy-1.6.0.tgz"
   integrity sha512-8SFQbg/0hQ9xy3UNTB0YEnsNBbWfhf7RtnzpL7TkBiTBRfrQ9Fxcnz7VJsleJpyp6rVLvXiuORqjlHi5q+PYuA==
   dependencies:
     streamsearch "^1.1.0"
@@ -150,7 +155,7 @@ chokidar@^3.5.2:
 
 cloudinary@^2.6.1:
   version "2.6.1"
-  resolved "https://registry.yarnpkg.com/cloudinary/-/cloudinary-2.6.1.tgz#19859befb47ca88d356cd9cad5185067bf34f004"
+  resolved "https://registry.npmjs.org/cloudinary/-/cloudinary-2.6.1.tgz"
   integrity sha512-Dt7o3p4VzxYoTi+EqWkVQmGy6WiXIyMcG5Gbr9kPR/EQ+jZa+3FFzlDKfDx1uDsaB1aTR1gYeO6wZqrgLFaByQ==
   dependencies:
     lodash "^4.17.21"
@@ -253,7 +258,7 @@ etag@~1.8.1:
 
 express-fileupload@^1.5.1:
   version "1.5.1"
-  resolved "https://registry.yarnpkg.com/express-fileupload/-/express-fileupload-1.5.1.tgz#a8be859e9d0ffb4497634b025ecb6d17796c370e"
+  resolved "https://registry.npmjs.org/express-fileupload/-/express-fileupload-1.5.1.tgz"
   integrity sha512-LsYG1ALXEB7vlmjuSw8ABeOctMp8a31aUC5ZF55zuz7O2jLFnmJYrCv10py357ky48aEoBQ/9bVXgFynjvaPmA==
   dependencies:
     busboy "^1.6.0"
@@ -717,7 +722,7 @@ statuses@~1.4.0:
 
 streamsearch@^1.1.0:
   version "1.1.0"
-  resolved "https://registry.yarnpkg.com/streamsearch/-/streamsearch-1.1.0.tgz#404dd1e2247ca94af554e841a8ef0eaa238da764"
+  resolved "https://registry.npmjs.org/streamsearch/-/streamsearch-1.1.0.tgz"
   integrity sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==
 
 supports-color@^5.5.0:
@@ -766,7 +771,7 @@ undefsafe@^2.0.5:
 
 uniqid@^5.4.0:
   version "5.4.0"
-  resolved "https://registry.yarnpkg.com/uniqid/-/uniqid-5.4.0.tgz#4e17bfcab66dfe33563411ae0c801f46ef964e66"
+  resolved "https://registry.npmjs.org/uniqid/-/uniqid-5.4.0.tgz"
   integrity sha512-38JRbJ4Fj94VmnC7G/J/5n5SC7Ab46OM5iNtSstB/ko3l1b5g7ALt4qzHFgGciFkyiRNtDXtLNb+VsxtMSE77A==
 
 unpipe@1.0.0, unpipe@~1.0.0:

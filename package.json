@@ -6,6 +6,7 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@huggingface/inference": "^3.13.2",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.6.1",
