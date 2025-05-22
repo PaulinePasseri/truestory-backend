@@ -6,6 +6,7 @@ var { HfInference } = require("@huggingface/inference");
 require("../models/connection");
 
 const Scenes = require("../models/scenes");
+const Games = require("../models/games");
 
 const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
@@ -13,7 +14,7 @@ const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 async function generateText(prompt) {
   try {
     const response = await hf.textGeneration({
-      model: "mistralai/Mistral-7B-Instruct-v0.3",
+      model: "mistralai/Mistral-7B-v0.1", // 
       inputs: prompt,
       parameters: {
         max_new_tokens: 100,
@@ -23,14 +24,13 @@ async function generateText(prompt) {
         repetition_penalty: 1.1,
       },
     });
-    // Vérification de la réponse
-    if (!response) {
+    if (!response || !response.generated_text) {
       throw new Error("Aucun texte généré par l'API");
     }
-    return response;
+    return response.generated_text;
   } catch (error) {
     console.error("Erreur lors de la requête à l'API Hugging Face :", error);
-    throw error; // Relancer l'erreur pour qu'elle soit gérée par l'appelant
+    throw error;
   }
 }
 
@@ -77,47 +77,39 @@ router.get("/:gameId", (req, res) => {
 });
 
 //route pour envoyer le titre et le genre à l'API pour générer la première scène
-router.post("/firstScene", async (req, res) => {
-  const { gameId, title, genre } = req.body;
+router.post("/firstScene", (req, res) => {
+  const { code } = req.body;
+  Games.findOne({ code: code }).then((game) => {
+    if (game) {
+      const gameId = game._id;
+      const title = game.title;
+      const genre = game.genre;
+      const prompt = createPrompt(title, genre);
 
-  if (!gameId || !title || !genre) {
-    return res.json({
-      result: false,
-      error: "gameId, title et genre sont requis",
-    });
-  }
-
-  try {
-    console.log(`Génération d'une scène pour: ${title} (${genre})`);
-
-    const prompt = createPrompt(title, genre);
-    //console.log("Prompt envoyé à l'API:", prompt);
-
-    const generatedText = await generateText(prompt);
-
-    if (!generatedText || generatedText.length === 0) {
-      return "L'API n'a pas généré de texte";
+      const generatedText = generateText(prompt);
+      generatedText.then((data) =>{
+        if (!data || data.length === 0) {
+          return "L'API n'a pas généré de texte";
+        }
+  
+        console.log("Texte généré:", data);
+  
+        const firstScene = new Scenes({
+          game: gameId,
+          status: false,
+          sceneNumber: 1,
+          voteWinner: null,
+          propositions: [],
+          text: data,
+        });
+  
+        firstScene.save().then((data) => {
+          res.json({ result: true, data });
+        });
+      })
+  
     }
-
-    console.log("Texte généré:", generatedText);
-
-    const firstScene = new Scenes({
-      game: gameId,
-      status: false,
-      sceneNumber: 1,
-      voteWinner: null,
-      propositions: [],
-      text: generatedText,
-    });
-
-    const savedScene = await firstScene.save();
-    console.log("Scène sauvegardée avec succès:", savedScene._id);
-
-    res.json({ result: true, data: savedScene });
-  } catch (error) {
-    console.error("Erreur lors de la génération de la première scène:", error);
-    res.json({ result: false, error: "Erreur lors de la génération" });
-  }
+  });
 });
 
 module.exports = router;
