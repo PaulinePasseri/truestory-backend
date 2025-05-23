@@ -223,29 +223,30 @@ router.post("/lastScene", (req, res) => {
 //Route pour récupérer une scène et ses propositions
 router.get("/code/:code/scene/:sceneNumber", (req, res) => {
   const { code, sceneNumber } = req.params;
+  console.log("PARAMS:", code, sceneNumber);
 
   if (!code || !sceneNumber) {
-    res.json({ result: false, error: "Code and sceneNumber required" });
+    return res.json({ result: false, error: "Code and sceneNumber required" });
   }
 
   Games.findOne({ code })
     .then((game) => {
       if (!game) {
-        res.json({ result: false, error: "Game not found" });
+        return res.json({ result: false, error: "Game not found" });
       }
 
-      return Scenes.findOne({
+       return Scenes.findOne({
         game: game._id,
-        sceneNumber: Number(sceneNumber),
+        sceneNumber: Number(sceneNumber)
       });
     })
     .then((scene) => {
       if (!scene) {
-        res.json({ result: false, error: "Scene not found" });
+        return res.json({ result: false, error: "Scene not found" });
       }
 
       res.json({ result: true, data: scene });
-    });
+    })
 });
 
 //Route pour envoyer une proposition d'un joueur donné à une scène donnée
