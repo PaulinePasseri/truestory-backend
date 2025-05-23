@@ -36,23 +36,13 @@ router.post("/create/:token", (req, res) => {
   });
 });
 
-// Route récupération du code de la partie
-router.get("/game/:gamecode", (req, res) => {
-  Games.findOne({ code: req.params.gamecode }).then((data) => {
-    if (data) {
-      res.json({
-        result: true,
-        game: {
-          code: data.code,
-          title: data.title,
-          nbPlayers: data.nbPlayers,
-          nbScenes: data.nbScenes,
-          genre: data.genre,
-          usersId: data.usersId,
-        },
-      });
+// Récupération des informations de la partie
+router.get("/game/:code", (req, res) => {
+  Games.findOne({ code: req.params.code }).then((game) => {
+    if (game) {
+      res.json({result: true, game });
     } else {
-      res.json({ result: false, error: "Code not found" });
+      res.json({ result: false, error: "Game not found" });
     }
   });
 });
