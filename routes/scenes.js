@@ -31,12 +31,17 @@ async function generateText(prompt) {
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre) {
-  return `Écris en français le début d'une histoire interactive dans le genre ${genre}.Le texte doit faire environ 1500-1700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le style du texte doit bien prendre en compte le ${genre} et le contenu doit s'adapter au ${title}. Le style doit être immersif et captivant. Mais tu ne dois pas proposer de choix`;
+  return `Écris en français le début d'une histoire interactive dans le genre ${genre}.Le texte doit faire environ 1500-1700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le style du texte doit bien prendre en compte le ${genre} et le contenu doit s'adapter au ${title}. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
 function createNextPrompt(text) {
-  return `Écris en français la suite de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le style du texte doit bien prendre en compte le contenu précédent et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant. Mais tu ne dois pas proposer de choix`;
+  return `Écris en français la suite de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le texte doit bien prendre en compte les scènes et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
+}
+
+// Fonction pour créer le prompt de la dernière scène
+function createLastPrompt(text) {
+  return `Écris en français la fin de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par la fin de l'histoire. Le texte doit bien prendre en compte les scènes précédentes et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant sans être lourd.  `;
 }
 
 //route pour envoyer les propositions à la BDD
@@ -132,7 +137,7 @@ router.post("/nextScene", (req, res) => {
 
   Games.findOne({ code }).then((game) => {
     if (!game) {
-      return res.json({ result: false, error: "Jeu non trouvé" });
+      return res.json({ result: false, error: "Game not found" });
     }
 
     //Incrémentation du numéro de scène
@@ -147,7 +152,7 @@ router.post("/nextScene", (req, res) => {
           if (!generatedText || generatedText.length === 0) {
             return res.json({
               result: false,
-              error: "L'API n'a pas généré de texte",
+              error: "Api do not generate text",
             });
           }
 
@@ -177,9 +182,8 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
-
-//route pour envoyer le texte à l'API pour générer la dernière scene
-router.post("/nextScene", (req, res) => {
+//route pour envoyer le texte à l'API pour générer la dernière scène
+router.post("/lastScene", (req, res) => {
   const { code, text } = req.body;
 
   if (!code || !text) {
@@ -188,7 +192,7 @@ router.post("/nextScene", (req, res) => {
 
   Games.findOne({ code }).then((game) => {
     if (!game) {
-      return res.json({ result: false, error: "Jeu non trouvé" });
+      return res.json({ result: false, error: "Game not found" });
     }
 
     //Incrémentation du numéro de scène
@@ -197,13 +201,13 @@ router.post("/nextScene", (req, res) => {
       .then((lastScene) => {
         const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
 
-        const prompt = createNextPrompt(text);
+        const prompt = createLastPrompt(text);
 
         generateText(prompt).then((generatedText) => {
           if (!generatedText || generatedText.length === 0) {
             return res.json({
               result: false,
-              error: "L'API n'a pas généré de texte",
+              error: "Api do not generate text",
             });
           }
 
@@ -233,19 +237,20 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
+
+
 //route pour récupérer une scène
 router.get("/code/:code/scene/:sceneNumber", (req, res) => {
   const { code, sceneNumber } = req.params;
-  console.log("PARAMS:", code, sceneNumber);
 
   if (!code || !sceneNumber) {
-    return res.json({ result: false, error: "Code and sceneNumber required" });
+     res.json({ result: false, error: "Code and sceneNumber required" });
   }
 
   Games.findOne({ code })
     .then((game) => {
       if (!game) {
-        return res.json({ result: false, error: "Game not found" });
+       res.json({ result: false, error: "Game not found" });
       }
 
        return Scenes.findOne({
@@ -255,10 +260,13 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
     })
     .then((scene) => {
       if (!scene) {
-        return res.json({ result: false, error: "Scene not found" });
+        res.json({ result: false, error: "Scene not found" });
       }
 
       res.json({ result: true, data: scene });
     })
 });
+
+
+
 module.exports = router;
