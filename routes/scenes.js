@@ -177,6 +177,62 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
+
+//route pour envoyer le texte à l'API pour générer la dernière scene
+router.post("/nextScene", (req, res) => {
+  const { code, text } = req.body;
+
+  if (!code || !text) {
+    return res.json({ result: false, error: "Code and text required" });
+  }
+
+  Games.findOne({ code }).then((game) => {
+    if (!game) {
+      return res.json({ result: false, error: "Jeu non trouvé" });
+    }
+
+    //Incrémentation du numéro de scène
+    Scenes.findOne({ game: game._id })
+      .sort({ sceneNumber: -1 })
+      .then((lastScene) => {
+        const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
+
+        const prompt = createNextPrompt(text);
+
+        generateText(prompt).then((generatedText) => {
+          if (!generatedText || generatedText.length === 0) {
+            return res.json({
+              result: false,
+              error: "L'API n'a pas généré de texte",
+            });
+          }
+
+          const newScene = new Scenes({
+            game: game._id,
+            status: false,
+            sceneNumber: nextSceneNumber,
+            text: generatedText,
+            voteWinner: null,
+            propositions: [],
+          });
+
+          newScene
+            .save()
+            .then((savedScene) => {
+              res.json({ result: true, data: savedScene });
+            })
+            .catch((err) => {
+              console.error("Error", err);
+              res.json({
+                result: false,
+                error: "Error",
+              });
+            });
+        });
+      });
+  });
+});
+
 //route pour récupérer une scène
 router.get("/code/:code/scene/:sceneNumber", (req, res) => {
   const { code, sceneNumber } = req.params;
