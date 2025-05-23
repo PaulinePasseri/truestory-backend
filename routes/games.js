@@ -112,4 +112,17 @@ router.get("/user/:token", (req, res) => {
     });
 });
 
+//Ajout d'un gagnant à la partie 
+router.put('/winner/:token/:code', (req, res) => {
+  const { token, code } = req.params
+  Games.updateOne({ code }, { winner: token })
+  .then(game => {
+    if (!game) {
+      res.json({ result: false, error: 'Game not found'})
+    } else {
+      res.json({ result: true, game })
+    }
+  })
+})
+
 module.exports = router;
