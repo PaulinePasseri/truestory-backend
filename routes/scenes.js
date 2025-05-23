@@ -235,6 +235,7 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
+      console.log(game._id, typeof(game._id))
        return Scenes.findOne({
         game: game._id,
         sceneNumber: Number(sceneNumber)
