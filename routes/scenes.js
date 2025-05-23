@@ -177,4 +177,32 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
+//route pour récupérer une scène
+router.get("/code/:code/scene/:sceneNumber", (req, res) => {
+  const { code, sceneNumber } = req.params;
+  console.log("PARAMS:", code, sceneNumber);
+
+  if (!code || !sceneNumber) {
+    return res.json({ result: false, error: "Code and sceneNumber required" });
+  }
+
+  Games.findOne({ code })
+    .then((game) => {
+      if (!game) {
+        return res.json({ result: false, error: "Game not found" });
+      }
+
+       return Scenes.findOne({
+        game: game._id,
+        sceneNumber: Number(sceneNumber)
+      });
+    })
+    .then((scene) => {
+      if (!scene) {
+        return res.json({ result: false, error: "Scene not found" });
+      }
+
+      res.json({ result: true, data: scene });
+    })
+});
 module.exports = router;
