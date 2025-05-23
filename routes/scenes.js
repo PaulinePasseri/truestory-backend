@@ -5,6 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("../models/connection");
 const Scenes = require("../models/scenes");
 const Games = require("../models/games");
+const Users = require("../models/users");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -44,42 +45,24 @@ function createLastPrompt(text) {
   return `Écris en français la fin de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par la fin de l'histoire. Le texte doit bien prendre en compte les scènes précédentes et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant sans être lourd.  `;
 }
 
-//route pour envoyer les propositions à la BDD
-router.post("/", (req, res) => {
-  const { userId, gameId, text } = req.body;
-
-  if (!gameId || !text || !userId) {
-    return res.json({ result: false, error: "gameId and text required" });
-  }
-
-  const newScene = new Scenes({
-    user: userId,
-    game: gameId,
-    text: text,
+//Route pour récupérer toutes les scènes d'une partie
+router.get("/:code", (req, res) => {
+  const { code } = req.params;
+  Games.findOne({ code }).then((game) => {
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+    Scenes.find({ game: game._id }).then((scenes) => {
+      if (scenes.length === 0) {
+        return res.json({ result: false, error: "No scenes found" });
+      } else {
+        return res.json({ result: true, scenes });
+      }
+    });
   });
-
-  newScene
-    .save()
-    .then((data) => {
-      res.json({ result: true, data });
-    })
-    .catch(() => {
-      res.json({ result: false, error: "Scene creation failed" });
-    });
 });
 
-//route pour récupérer les propositions de la BDD
-router.get("/:gameId", (req, res) => {
-  Scenes.find({ game: req.params.gameId })
-    .then((data) => {
-      res.json({ result: true, data });
-    })
-    .catch(() => {
-      res.json({ result: false, error: "Scene recuperation failed" });
-    });
-});
-
-//route pour envoyer le titre et le genre à l'API pour générer la première scène
+//Route pour envoyer le titre et le genre à l'API pour générer la première scène
 router.post("/firstScene", (req, res) => {
   const { code } = req.body;
 
@@ -127,7 +110,7 @@ router.post("/firstScene", (req, res) => {
     });
 });
 
-//route pour envoyer le texte à l'API pour générer la scène suivante
+//Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
   const { code, text } = req.body;
 
@@ -182,7 +165,7 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
-//route pour envoyer le texte à l'API pour générer la dernière scène
+//Route pour envoyer le texte à l'API pour générer la dernière scène
 router.post("/lastScene", (req, res) => {
   const { code, text } = req.body;
 
@@ -237,25 +220,23 @@ router.post("/lastScene", (req, res) => {
   });
 });
 
-
-
-//route pour récupérer une scène
+//Route pour récupérer une scène et ses propositions
 router.get("/code/:code/scene/:sceneNumber", (req, res) => {
   const { code, sceneNumber } = req.params;
 
   if (!code || !sceneNumber) {
-     res.json({ result: false, error: "Code and sceneNumber required" });
+    res.json({ result: false, error: "Code and sceneNumber required" });
   }
 
   Games.findOne({ code })
     .then((game) => {
       if (!game) {
-       res.json({ result: false, error: "Game not found" });
+        res.json({ result: false, error: "Game not found" });
       }
 
-       return Scenes.findOne({
+      return Scenes.findOne({
         game: game._id,
-        sceneNumber: Number(sceneNumber)
+        sceneNumber: Number(sceneNumber),
       });
     })
     .then((scene) => {
@@ -264,9 +245,59 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
       }
 
       res.json({ result: true, data: scene });
-    })
+    });
 });
 
+//Route pour envoyer une proposition d'un joueur donné à une scène donnée
+router.put("/proposition/:code/:sceneNumber/:token", async (req, res) => {
+  const { code, sceneNumber, token } = req.params;
+  const { text } = req.body;
 
+  if (!text) {
+    return res.json({ result: false, error: "gameId and text required" });
+  }
+
+  const game = await Games.findOne({ code });
+  if (!game) {
+    return res.json({ result: false, error: "Game not found" });
+  }
+
+  const user = Users.findOne({ token });
+  if (!user) {
+    return res.json({ result: false, error: "User not found" });
+  }
+
+  const addProposition = await Scenes.updateOne(
+    { game: game._id, sceneNumber: Number(sceneNumber) },
+    { $push: { propositions: { userId: user._id, text: text, votes: 0 } } }
+  );
+  if (addProposition.prpopositions.length === 0) {
+    return res.json({ result: false, error: "Scene not updated" });
+  }
+  return res.json({ result: true, message: "Scene updated successfully" });
+});
+
+//Route pour ajouter un vote à une scène
+router.put("/vote/:sceneId/:propositionId", async (req, res) => {
+  const { sceneId, propositionId } = req.params;
+  const result = await Scenes.updateOne(
+    {
+      _id: sceneId,
+      "propositions._id": propositionId,
+    },
+    {
+      $inc: { "propositions.$.votes": 1 },
+    }
+  );
+
+  if (result.modifiedCount === 0) {
+    return res.json({
+      result: false,
+      error: "Proposition not found or no update made",
+    });
+  }
+
+  return res.json({ result: true, message: "Vote added" });
+});
 
 module.exports = router;
