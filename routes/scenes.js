@@ -273,7 +273,7 @@ router.put("/proposition/:code/:sceneNumber/:token", async (req, res) => {
     { game: game._id, sceneNumber: Number(sceneNumber) },
     { $push: { propositions: { userId: user._id, text: text, votes: 0 } } }
   );
-  if (addProposition.prpopositions.length === 0) {
+  if (addProposition.modifiedCount === 0) {
     return res.json({ result: false, error: "Scene not updated" });
   }
   return res.json({ result: true, message: "Scene updated successfully" });
