@@ -235,10 +235,10 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
-      console.log(game._id, typeof(game._id))
-       return Scenes.findOne({
+      console.log(game._id, typeof game._id);
+      return Scenes.findOne({
         game: game._id,
-        sceneNumber: Number(sceneNumber)
+        sceneNumber: Number(sceneNumber),
       });
     })
     .then((scene) => {
@@ -247,7 +247,7 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
       }
 
       res.json({ result: true, data: scene });
-    })
+    });
 });
 
 //Route pour envoyer une proposition d'un joueur donné à une scène donnée
@@ -264,7 +264,7 @@ router.put("/proposition/:code/:sceneNumber/:token", async (req, res) => {
     return res.json({ result: false, error: "Game not found" });
   }
 
-  const user = Users.findOne({ token });
+  const user = await Users.findOne({ token });
   if (!user) {
     return res.json({ result: false, error: "User not found" });
   }
@@ -300,6 +300,56 @@ router.put("/vote/:sceneId/:propositionId", async (req, res) => {
   }
 
   return res.json({ result: true, message: "Vote added" });
+});
+
+//Route pour récupérer le gagnant du vote d'une scène
+router.put("/voteWinner/:code/:sceneNumber", async (req, res) => {
+  const { code, sceneNumber } = req.params;
+
+  //Cherche le jeu via son code
+  const game = await Games.findOne({ code });
+  if (!game) {
+    return res.json({ result: false, error: "Game not found" });
+  }
+
+  //Cherche la scène via son numéro et l'id du jeu
+  const scene = await Scenes.findOne({
+    game: game._id,
+    sceneNumber: Number(sceneNumber),
+  });
+  if (!scene) {
+    return res.json({ result: false, error: "Scene not found" });
+  }
+
+  //Cherche le gagnant des votes parmi les propositions
+  const winner = scene.propositions.reduce(
+    (max, prop) => (prop.votes > max.votes ? prop : max),
+    scene.propositions[0]
+  );
+  if (!winner) {
+    return res.json({ result: false, error: "No winner found" });
+  }
+
+  //Cherche l'utilisateur via son userId
+  const user = await Users.findOne({ _id: winner.userId });
+  if (!user) return res.json({ result: false, error: "User not found" });
+
+  //Met à jour la scène avec le pseudo du gagnant
+  const updateScene = await Scenes.updateOne(
+    { _id: scene._id },
+    { $set: { voteWinner: user.nickname } }
+  );
+  if (updateScene.modifiedCount === 0) {
+    return res.json({ result: false, error: "Scene not updated" });
+  }
+  return res.json({
+    result: true,
+    data: {
+      nickname: user.nickname,
+      text: winner.text,
+      votes: winner.votes,
+    },
+  });
 });
 
 module.exports = router;

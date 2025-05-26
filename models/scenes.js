@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const propositionsSchema = mongoose.Schema({
-  usersId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   text: String,
   votes: Number,
 });
