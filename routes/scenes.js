@@ -31,13 +31,13 @@ async function generateText(prompt) {
 }
 
 // Fonction pour créer le prompt de la première scène
-function createFirstPrompt(title, genre) {
-  return `Écris en français le début d'une histoire interactive dans le genre ${genre}.Le texte doit faire environ 1500-1700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le style du texte doit bien prendre en compte le ${genre} et le contenu doit s'adapter au ${title}. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
+function createFirstPrompt(title, genre, nbScene) {
+  return `Écris en français le début d'une histoire interactive dans le genre ${genre}.Le texte doit faire environ 800-1000 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. L'histoire avance plus ou moins vite en fonction du nombre de ${nbScene}. Le style du texte doit bien prendre en compte le ${genre} et le contenu doit s'adapter au ${title}. Le style doit être immersif et captivant sans être lourd et trop détaillé. Mais tu ne dois pas proposer de choix`;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text) {
-  return `Écris en français la suite de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le texte doit bien prendre en compte les scènes et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
+function createNextPrompt(text, nbScene) {
+  return `Écris en français la suite de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le texte doit bien prendre en compte les scènes et le ${text} donné sans l'inclure directement. L'avancement de l'histoire doit prendre en compte le ${nbScene} restante. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
 }
 
 // Fonction pour créer le prompt de la dernière scène
