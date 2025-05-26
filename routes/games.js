@@ -11,11 +11,20 @@ router.post("/create/:token", (req, res) => {
     if (!user) {
       return res.json({ result: false, error: "Invalid token" });
     }
+    // Fonction pour générer un code de jeu aléatoire
+    function generateGameCode(length = 5) {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += letters.charAt(Math.floor(Math.random() * letters.length));
+      }
+      return result;
+    }
 
     const userId = user._id;
     const newGames = new Games({
       status: true, // true si la partie est en cours
-      code: uid2(5),
+      code: generateGameCode(5),
       title: req.body.title,
       image: req.body.image,
       nbPlayers: req.body.nbPlayers,
