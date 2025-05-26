@@ -82,6 +82,7 @@ router.post("/join", (req, res) => {
 
 // Récupération des joueurs de la partie
 router.get("/players/:gamecode", (req, res) => {
+  
   Games.findOne({ code: req.params.gamecode })
     .populate("usersId")
     .then((data) => {
@@ -112,17 +113,20 @@ router.get("/user/:token", (req, res) => {
     });
 });
 
-//Ajout d'un gagnant à la partie 
-router.put('/winner/:token/:code', (req, res) => {
-  const { token, code } = req.params
-  Games.updateOne({ code }, { winner: token })
-  .then(game => {
-    if (!game) {
-      res.json({ result: false, error: 'Game not found'})
-    } else {
-      res.json({ result: true, game })
-    }
-  })
-})
+// Terminer une partie et ajouter un gagnant
+router.put('/end/:code/:token', (req, res) => {
+  const { code, token } = req.params;
+
+  const updateFields = { status: false };
+  if (token) updateFields.winner = token;
+
+  Games.updateOne({ code }, updateFields)
+    .then((game) => {
+      if (!game) {
+        return res.json({ result: false, error: 'Game not found' });
+      }
+      res.json({ result: true, message: 'Game ended and winner saved' });
+    })
+});
 
 module.exports = router;
