@@ -112,7 +112,7 @@ router.post("/firstScene", (req, res) => {
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
-  const { code, text } = req.body;
+  const { code, text, sceneNumber } = req.body;
 
   if (!code || !text) {
     return res.json({ result: false, error: "Code and text required" });
@@ -125,10 +125,7 @@ router.post("/nextScene", (req, res) => {
 
     //Incrémentation du numéro de scène
     Scenes.findOne({ game: game._id })
-      .sort({ sceneNumber: -1 })
-      .then((lastScene) => {
-        const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
-
+      .then(() => {
         const prompt = createNextPrompt(text);
 
         generateText(prompt).then((generatedText) => {
@@ -142,7 +139,7 @@ router.post("/nextScene", (req, res) => {
           const newScene = new Scenes({
             game: game._id,
             status: false,
-            sceneNumber: nextSceneNumber,
+            sceneNumber: sceneNumber,
             text: generatedText,
             voteWinner: null,
             propositions: [],
@@ -153,13 +150,6 @@ router.post("/nextScene", (req, res) => {
             .then((savedScene) => {
               res.json({ result: true, data: savedScene });
             })
-            .catch((err) => {
-              console.error("Error", err);
-              res.json({
-                result: false,
-                error: "Error",
-              });
-            });
         });
       });
   });
@@ -302,7 +292,7 @@ router.put("/vote/:sceneId/:propositionId", async (req, res) => {
   return res.json({ result: true, message: "Vote added" });
 });
 
-//Route pour récupérer le gagnant du vote d'une scène
+//Route pour ajouter le gagnant du vote à une scène
 router.put("/voteWinner/:code/:sceneNumber", async (req, res) => {
   const { code, sceneNumber } = req.params;
 
@@ -344,11 +334,43 @@ router.put("/voteWinner/:code/:sceneNumber", async (req, res) => {
   }
   return res.json({
     result: true,
+    message: "Winner updated successfully",
+  });
+});
+
+//Route pour récupérer le gagnant du vote d'une scène
+router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
+  const { code, sceneNumber } = req.params;
+
+  const game = await Games.findOne({ code });
+  if (!game) {
+    return res.json({ result: false, error: "Game not found" });
+  }
+
+  const scene = await Scenes.findOne({
+    game: game._id,
+    sceneNumber: Number(sceneNumber),
+  });
+  if (!scene || !scene.voteWinner) {
+    return res.json({ result: false, error: "Winner not yet defined" });
+  }
+
+  // Trouver la proposition gagnante
+  const winner = scene.propositions.reduce(
+    (max, prop) => (prop.votes > max.votes ? prop : max),
+    scene.propositions[0]
+  );
+
+  const user = await Users.findOne({ _id: winner.userId });
+  if (!user) return res.json({ result: false, error: "User not found" });
+
+  return res.json({
+    result: true,
     data: {
       nickname: user.nickname,
       text: winner.text,
       votes: winner.votes,
-      avatar: user.avatar
+      avatar: user.avatar,
     },
   });
 });
