@@ -1,5 +1,8 @@
 const request = require("supertest");
-const app = require("./app");
+const mongoose = require("mongoose");
+const app = require("./app"); // adapte si besoin
+const Games = require("./models/games");
+const Scenes = require("./models/scenes");
 
 // Test route get /games/game/:code
 // it("GET /games/game/MOXHF", async () => {
@@ -83,3 +86,25 @@ const app = require("./app");
 //     "__v": 0
 //   });
 // });
+
+// ("test route get scenes/:code");
+// it("GET /scenes/FVOOT", async () => {
+//   const res = await request(app).get("/scenes/FVOOT");
+//   expect(res.statusCode).toBe(200);
+
+//   expect(res.body).toMatchObject({
+//     result: true,
+//     scenes: [
+//       {
+//         sceneNumber: 1,
+//         status: false,
+//         text: expect.stringContaining("La vapeur du café"),
+//         voteWinner: null,
+//         propositions: [],
+//       }
+//     ]
+//   });
+// });
+
+
+
