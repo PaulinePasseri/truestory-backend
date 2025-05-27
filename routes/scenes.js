@@ -348,6 +348,7 @@ router.put("/voteWinner/:code/:sceneNumber", async (req, res) => {
       nickname: user.nickname,
       text: winner.text,
       votes: winner.votes,
+      avatar: user.avatar
     },
   });
 });
