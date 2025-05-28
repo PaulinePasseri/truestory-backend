@@ -36,7 +36,7 @@ function createFirstPrompt(title, genre, nbScene) {
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
-- Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues
+- Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues mais ne génère qu'une seule scène
 - Titre à intégrer : ${title}
 
 **Style et ton :**
@@ -69,7 +69,7 @@ function createNextPrompt(text, history, remainingScenes ) {
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
-- Rythme : calibre l'avancement selon les ${remainingScenes} scènes restantes
+- Rythme : calibre l'avancement selon les ${remainingScenes} scènes restantes mais ne génère qu'une seule scène
 - Si peu de scènes restantes : accélère vers le dénouement
 - Si nombreuses scènes : développe progressivement les enjeux
 
@@ -179,7 +179,7 @@ router.post("/firstScene", (req, res) => {
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
-  const { code, text, history, remainingScenes } = req.body;
+  const { code, text, history, remainingScenes, sceneNumber } = req.body;
 
   if (!code || !text ) {
     return res.json({ result: false, error: "Code and text required" });
