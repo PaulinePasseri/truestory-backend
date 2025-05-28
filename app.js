@@ -2,7 +2,6 @@ require('dotenv').config()
 require('./models/connection')
 
 
-var exportsRouter = require('./routes/exports');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -13,6 +12,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var gamesRouter = require('./routes/games');
 var scenesRouter = require('./routes/scenes');
+var exportsRouter = require('./routes/exports');
 
 
 
