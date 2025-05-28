@@ -31,13 +31,8 @@ return text;
 }
 
 // Fonction pour créer le prompt de la première scène
-<<<<<<< HEAD
-function createFirstPrompt(title, genre, nbScene, public) {
-  return `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
-=======
 function createFirstPrompt(title, genre, nbScene) {
   return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
->>>>>>> ec2f588f641a456574159e9dd466c5697cc405fc
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
@@ -184,7 +179,7 @@ router.post("/firstScene", (req, res) => {
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
-  const { text, history, remainingScenes, public } = req.body;
+  const { code, text, history, remainingScenes } = req.body;
 
   if (!code || !text ) {
     return res.json({ result: false, error: "Code and text required" });
@@ -194,6 +189,7 @@ router.post("/nextScene", (req, res) => {
     if (!game) {
       return res.json({ result: false, error: "Game not found" });
     }
+    const public = game.public
 
 //Incrémentation du numéro de scène
 Scenes.findOne({ game: game._id })
@@ -229,7 +225,7 @@ Scenes.findOne({ game: game._id })
 
 //Route pour envoyer le texte à l'API pour générer la dernière scène
 router.post("/lastScene", (req, res) => {
-  const { text, history, public } = req.body;
+  const { text, history } = req.body;
 
   if (!code || !text) {
     return res.json({ result: false, error: "Code and text required" });
@@ -239,6 +235,7 @@ router.post("/lastScene", (req, res) => {
     if (!game) {
       return res.json({ result: false, error: "Game not found" });
     }
+    const public = game.public
 
 //Incrémentation du numéro de scène
 Scenes.findOne({ game: game._id })
