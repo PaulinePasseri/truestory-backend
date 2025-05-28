@@ -225,7 +225,7 @@ Scenes.findOne({ game: game._id })
 
 //Route pour envoyer le texte à l'API pour générer la dernière scène
 router.post("/lastScene", (req, res) => {
-  const { text, history } = req.body;
+  const { code, text, history } = req.body;
 
   if (!code || !text) {
     return res.json({ result: false, error: "Code and text required" });
