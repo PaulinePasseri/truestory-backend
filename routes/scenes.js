@@ -83,7 +83,7 @@ function createNextPrompt(text, history, remainingScenes ) {
 }
 
 // Fonction pour créer le prompt de la dernière scène
-function createLastPrompt(text) {
+function createLastPrompt(text, history) {
   return `Écris en français la conclusion définitive de l'histoire interactive.
 
 **Contexte narratif :**
