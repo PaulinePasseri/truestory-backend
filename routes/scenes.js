@@ -31,13 +31,8 @@ return text;
 }
 
 // Fonction pour créer le prompt de la première scène
-<<<<<<< HEAD
 function createFirstPrompt(title, genre, nbScene, public) {
   return `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
-=======
-function createFirstPrompt(title, genre, nbScene) {
-  return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
->>>>>>> ec2f588f641a456574159e9dd466c5697cc405fc
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
