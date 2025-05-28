@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { generateVoice } = require("../models/voice");
+const { generateVoice } = require("../modules/exports");
 
 // Route POST : /exports/generate
 router.post("/generate", async (req, res) => {

@@ -1,5 +1,4 @@
-const fetch = require("node-fetch");
-require("dotenv").config();
+const fetch = require('node-fetch');
 
 async function generateVoice(text) {
   const API_KEY = process.env.ELEVEN_API_KEY;
@@ -27,7 +26,7 @@ async function generateVoice(text) {
     throw new Error("Erreur ElevenLabs : " + errorText);
   }
 
-  return response.body; // On renvoie le flux audio
+  return response.body;
 }
 
 module.exports = { generateVoice };
