@@ -5,6 +5,7 @@ const gamesSchema = mongoose.Schema({
  code: String,
  title: String,
  image: String,
+ public: String,
  genre: String,
  nbPlayers: Number,
  nbScenes: Number,

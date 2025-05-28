@@ -32,12 +32,12 @@ return text;
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre, nbScene, public) {
-  return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
+  return `Écris le début d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
 - Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues
-- Titre à intégrer : ${title}
+- Titre à intégrer dans la création de l'histoire : ${title}
 - Public cible : ${public}
 
 **Style et ton :**
@@ -56,7 +56,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, history, remainingScenes ) {
+function createNextPrompt(text, history, remainingScenes, public ) {
   return `**Contexte narratif :**
 - Historique des scènes : ${history}
 - Action choisie par les joueurs : "${text}"
@@ -85,7 +85,7 @@ function createNextPrompt(text, history, remainingScenes ) {
 }
 
 // Fonction pour créer le prompt de la dernière scène
-function createLastPrompt(text) {
+function createLastPrompt(text, history, public) {
   return `Écris en français la conclusion définitive de l'histoire interactive.
 
 **Contexte narratif :**
