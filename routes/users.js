@@ -105,6 +105,17 @@ router.put("/profile", (req, res) => {
   });
 });
 
+router.put('/profile/nickname', (req, res) => {
+  const { nickname, token } = req.body
+  User.updateOne({ token: token }, { nickname: nickname }).then(data => {
+    if (data.modifiedCount === 0) {
+      res.json({result: false, error: "Nickname not updated"})
+    } else {
+      res.json({result: true, message: "Nickname updated"})
+    }
+  })
+})
+
 router.get("/:token", (req, res) => {
   User.findOne({ token: req.params.token }).then((user) => {
     if (user) {

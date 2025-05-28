@@ -31,37 +31,41 @@ return text;
 }
 
 // Fonction pour créer le prompt de la première scène
+<<<<<<< HEAD
 function createFirstPrompt(title, genre, nbScene, public) {
   return `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
+=======
+function createFirstPrompt(title, genre, nbScene) {
+  return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
+>>>>>>> ec2f588f641a456574159e9dd466c5697cc405fc
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
 - Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues
-- Titre à intégrer dans la création de l'histoire : ${title}
-- Public cible : ${public}
+- Titre à intégrer : ${title}
 
 **Style et ton :**
 - Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références)
-- Adapte le vocabulaire, les thèmes et la complexité au public ${public}
 - Style immersif et captivant, sans surcharge descriptive
 - Narration à la 2e ou 3e personne (varie selon le contexte)
 - Assure la variété entre les générations successives
 
 **Structure narrative :**
-- Établis rapidement le contexte et les enjeux adaptés au public ${public}
+- Établis rapidement le contexte et les enjeux
 - Termine par un cliffhanger marquant : tension, conflit, révélation ou question cruciale
 - Crée un momentum qui donne envie de connaître la suite
 
-**Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative adapté au public ${public}.`;
+**Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative.`;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, history, remainingScenes, public ) {
-  return `**Contexte narratif :**
+function createNextPrompt(text, history, remainingScenes ) {
+  return `Écris en français la suite de l'histoire interactive.
+
+**Contexte narratif :**
 - Historique des scènes : ${history}
 - Action choisie par les joueurs : "${text}"
 - Scènes restantes : ${remainingScenes}
-- Public cible : ${public}
 
 **Intégration de l'action :**
 - Incorpore naturellement l'action "${text}" dans la continuité narrative
@@ -69,29 +73,27 @@ function createNextPrompt(text, history, remainingScenes, public ) {
 - Assure une transition fluide avec les événements précédents
 
 **Contraintes techniques :**
-- Longueur : 500-700 caractères maximum
+- Longueur : 400-600 caractères maximum
 - Rythme : calibre l'avancement selon les ${remainingScenes} scènes restantes
 - Si peu de scènes restantes : accélère vers le dénouement
 - Si nombreuses scènes : développe progressivement les enjeux
 
 **Style narratif :**
 - Maintiens la cohérence stylistique avec l'historique
-- Adapte le contenu et le vocabulaire au public ${public}
 - Style immersif et captivant, sans lourdeur descriptive
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
-**Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative adapté au public ${public}.`;
+**Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
 ;
 }
 
 // Fonction pour créer le prompt de la dernière scène
-function createLastPrompt(text, history, public) {
+function createLastPrompt(text) {
   return `Écris en français la conclusion définitive de l'histoire interactive.
 
 **Contexte narratif :**
 - Historique des scènes : ${history}
 - Type de fin souhaitée : "${text}"
-- Public cible : ${public}
 
 **Résolution narrative :**
 - Intègre l'orientation de fin "${text}" de manière organique et narrative
@@ -100,18 +102,17 @@ function createLastPrompt(text, history, public) {
 - Assure une conclusion cohérente avec l'ensemble de l'histoire
 
 **Contraintes techniques :**
-- Longueur : 500-700 caractères maximum
+- Longueur : 400-600 caractères maximum
 - Structure : développement du climax + résolution + chute finale
 - Rythme : conclusion satisfaisante sans précipitation
 
 **Style narratif :**
 - Maintiens la cohérence stylistique avec l'historique complet
-- Adapte le dénouement et les messages au public ${public}
 - Style immersif et captivant, adapté au dénouement
 - Ton approprié selon le type de fin (tragique, héroïque, mystérieux, etc.)
 - Évite les fins abruptes : apporte une vraie conclusion
 
-**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif adapté au public ${public}.`;
+**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif.`;
 }
 
 //Route pour récupérer toutes les scènes d'une partie
@@ -434,8 +435,7 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
 
   const winnersWithMaxVotes = scene.propositions.filter(prop => prop.votes === maxVotes.votes);
 
-  const randomIndex = Math.floor(Math.random() * winnersWithMaxVotes.length);
-  const winner = winnersWithMaxVotes[randomIndex];
+  const winner = winnersWithMaxVotes[0];
   
   const user = await Users.findOne({ _id: winner.userId });
   if (!user) return res.json({ result: false, error: "User not found" });
