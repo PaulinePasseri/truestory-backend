@@ -15,15 +15,15 @@ async function generateText(prompt) {
     // Utiliser le nouveau nom de modèle
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+const result = await model.generateContent(prompt);
+const response = await result.response;
+const text = response.text();
 
-    if (!text) {
-      throw new Error("No text generate by API.");
-    }
+if (!text) {
+  throw new Error("No text generate by API.");
+}
 
-    return text;
+return text;
   } catch (error) {
     console.error("Error with API :", error.message);
     throw error;
@@ -32,17 +32,82 @@ async function generateText(prompt) {
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre, nbScene) {
-  return `Écris en français le début d'une histoire interactive dans le genre ${genre}.Le texte doit faire environ 800-1000 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. L'histoire avance plus ou moins vite en fonction du nombre de ${nbScene}. Le style du texte doit bien prendre en compte le ${genre} et le contenu doit s'adapter au ${title}. Le style doit être immersif et captivant sans être lourd et trop détaillé. Mais tu ne dois pas proposer de choix`;
+  return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
+
+**Contraintes techniques :**
+- Longueur : 500-700 caractères maximum
+- Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues
+- Titre à intégrer : ${title}
+
+**Style et ton :**
+- Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références)
+- Style immersif et captivant, sans surcharge descriptive
+- Narration à la 2e ou 3e personne (varie selon le contexte)
+- Assure la variété entre les générations successives
+
+**Structure narrative :**
+- Établis rapidement le contexte et les enjeux
+- Termine par un cliffhanger marquant : tension, conflit, révélation ou question cruciale
+- Crée un momentum qui donne envie de connaître la suite
+
+**Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative.`;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, nbScene) {
-  return `Écris en français la suite de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par un cliffhanger, une tension, un conflit ou une interrogation. Le texte doit bien prendre en compte les scènes et le ${text} donné sans l'inclure directement. L'avancement de l'histoire doit prendre en compte le ${nbScene} restante. Le style doit être immersif et captivant sans être lourd. Mais tu ne dois pas proposer de choix`;
+function createNextPrompt(text, history, remainingScenes ) {
+  return `Écris en français la suite de l'histoire interactive.
+
+**Contexte narratif :**
+- Historique des scènes : ${history}
+- Action choisie par les joueurs : "${text}"
+- Scènes restantes : ${remainingScenes}
+
+**Intégration de l'action :**
+- Incorpore naturellement l'action "${text}" dans la continuité narrative
+- Évite la répétition littérale : transforme, interprète ou développe l'idée
+- Assure une transition fluide avec les événements précédents
+
+**Contraintes techniques :**
+- Longueur : 400-600 caractères maximum
+- Rythme : calibre l'avancement selon les ${remainingScenes} scènes restantes
+- Si peu de scènes restantes : accélère vers le dénouement
+- Si nombreuses scènes : développe progressivement les enjeux
+
+**Style narratif :**
+- Maintiens la cohérence stylistique avec l'historique
+- Style immersif et captivant, sans lourdeur descriptive
+- Termine par un nouveau cliffhanger : tension, révélation ou dilemme
+
+**Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
+;
 }
 
 // Fonction pour créer le prompt de la dernière scène
 function createLastPrompt(text) {
-  return `Écris en français la fin de l'histoire interactive. Le texte doit faire environ 500-700 caractères maximum et doit se terminer par la fin de l'histoire. Le texte doit bien prendre en compte les scènes précédentes et le ${text} donné sans l'inclure directement. Le style doit être immersif et captivant sans être lourd.  `;
+  return `Écris en français la conclusion définitive de l'histoire interactive.
+
+**Contexte narratif :**
+- Historique des scènes : ${history}
+- Type de fin souhaitée : "${text}"
+
+**Résolution narrative :**
+- Intègre l'orientation de fin "${text}" de manière organique et narrative
+- Ne reproduis pas directement le texte : interprète-le comme une direction créative
+- Résous les conflits et tensions établis dans les scènes précédentes
+- Assure une conclusion cohérente avec l'ensemble de l'histoire
+
+**Contraintes techniques :**
+- Longueur : 400-600 caractères maximum
+- Structure : développement du climax + résolution + chute finale
+- Rythme : conclusion satisfaisante sans précipitation
+
+**Style narratif :**
+- Maintiens la cohérence stylistique avec l'historique complet
+- Style immersif et captivant, adapté au dénouement
+- Ton approprié selon le type de fin (tragique, héroïque, mystérieux, etc.)
+- Évite les fins abruptes : apporte une vraie conclusion
+
+**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif.`;
 }
 
 //Route pour récupérer toutes les scènes d'une partie
@@ -72,42 +137,42 @@ router.post("/firstScene", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
-      const gameId = game._id;
-      const title = game.title;
-      const genre = game.genre;
-      const prompt = createFirstPrompt(title, genre);
+  const gameId = game._id;
+  const title = game.title;
+  const genre = game.genre;
+  const prompt = createFirstPrompt(title, genre);
 
-      return generateText(prompt).then((generatedText) => {
-        if (!generatedText || generatedText.length === 0) {
-          return res.json({
-            result: false,
-            error: "L'API do not generate text",
-          });
-        }
-
-        console.log("Texte généré:", generatedText);
-
-        const firstScene = new Scenes({
-          game: gameId,
-          status: false,
-          sceneNumber: 1,
-          voteWinner: null,
-          propositions: [],
-          text: generatedText,
-        });
-
-        return firstScene.save().then((savedScene) => {
-          res.json({ result: true, data: savedScene });
-        });
-      });
-    })
-    .catch((error) => {
-      console.error("Erreur dans /firstScene:", error);
-      res.json({
+  return generateText(prompt).then((generatedText) => {
+    if (!generatedText || generatedText.length === 0) {
+      return res.json({
         result: false,
-        error: "Error while generating the first scene",
+        error: "L'API do not generate text",
       });
+    }
+
+    console.log("Texte généré:", generatedText);
+
+    const firstScene = new Scenes({
+      game: gameId,
+      status: false,
+      sceneNumber: 1,
+      voteWinner: null,
+      propositions: [],
+      text: generatedText,
     });
+
+    return firstScene.save().then((savedScene) => {
+      res.json({ result: true, data: savedScene });
+    });
+  });
+})
+.catch((error) => {
+  console.error("Erreur dans /firstScene:", error);
+  res.json({
+    result: false,
+    error: "Error while generating the first scene",
+  });
+});
 });
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
@@ -123,35 +188,35 @@ router.post("/nextScene", (req, res) => {
       return res.json({ result: false, error: "Game not found" });
     }
 
-    //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id })
-      .then(() => {
-        const prompt = createNextPrompt(text);
+//Incrémentation du numéro de scène
+Scenes.findOne({ game: game._id })
+  .then(() => {
+    const prompt = createNextPrompt(text);
 
-        generateText(prompt).then((generatedText) => {
-          if (!generatedText || generatedText.length === 0) {
-            return res.json({
-              result: false,
-              error: "Api do not generate text",
-            });
-          }
-
-          const newScene = new Scenes({
-            game: game._id,
-            status: false,
-            sceneNumber: sceneNumber,
-            text: generatedText,
-            voteWinner: null,
-            propositions: [],
-          });
-
-          newScene
-            .save()
-            .then((savedScene) => {
-              res.json({ result: true, data: savedScene });
-            })
+    generateText(prompt).then((generatedText) => {
+      if (!generatedText || generatedText.length === 0) {
+        return res.json({
+          result: false,
+          error: "Api do not generate text",
         });
+      }
+
+      const newScene = new Scenes({
+        game: game._id,
+        status: false,
+        sceneNumber: sceneNumber,
+        text: generatedText,
+        voteWinner: null,
+        propositions: [],
       });
+
+      newScene
+        .save()
+        .then((savedScene) => {
+          res.json({ result: true, data: savedScene });
+        })
+    });
+  });
   });
 });
 
@@ -168,45 +233,45 @@ router.post("/lastScene", (req, res) => {
       return res.json({ result: false, error: "Game not found" });
     }
 
-    //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id })
-      .sort({ sceneNumber: -1 })
-      .then((lastScene) => {
-        const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
+//Incrémentation du numéro de scène
+Scenes.findOne({ game: game._id })
+  .sort({ sceneNumber: -1 })
+  .then((lastScene) => {
+    const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
 
-        const prompt = createLastPrompt(text);
+    const prompt = createLastPrompt(text);
 
-        generateText(prompt).then((generatedText) => {
-          if (!generatedText || generatedText.length === 0) {
-            return res.json({
-              result: false,
-              error: "Api do not generate text",
-            });
-          }
-
-          const newScene = new Scenes({
-            game: game._id,
-            status: false,
-            sceneNumber: nextSceneNumber,
-            text: generatedText,
-            voteWinner: null,
-            propositions: [],
-          });
-
-          newScene
-            .save()
-            .then((savedScene) => {
-              res.json({ result: true, data: savedScene });
-            })
-            .catch((err) => {
-              console.error("Error", err);
-              res.json({
-                result: false,
-                error: "Error",
-              });
-            });
+    generateText(prompt).then((generatedText) => {
+      if (!generatedText || generatedText.length === 0) {
+        return res.json({
+          result: false,
+          error: "Api do not generate text",
         });
+      }
+
+      const newScene = new Scenes({
+        game: game._id,
+        status: false,
+        sceneNumber: nextSceneNumber,
+        text: generatedText,
+        voteWinner: null,
+        propositions: [],
       });
+
+      newScene
+        .save()
+        .then((savedScene) => {
+          res.json({ result: true, data: savedScene });
+        })
+        .catch((err) => {
+          console.error("Error", err);
+          res.json({
+            result: false,
+            error: "Error",
+          });
+        });
+    });
+  });
   });
 });
 
@@ -225,19 +290,19 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
-      console.log(game._id, typeof game._id);
-      return Scenes.findOne({
-        game: game._id,
-        sceneNumber: Number(sceneNumber),
-      });
-    })
-    .then((scene) => {
-      if (!scene) {
-        return res.json({ result: false, error: "Scene not found" });
-      }
+  console.log(game._id, typeof game._id);
+  return Scenes.findOne({
+    game: game._id,
+    sceneNumber: Number(sceneNumber),
+  });
+})
+.then((scene) => {
+  if (!scene) {
+    return res.json({ result: false, error: "Scene not found" });
+  }
 
-      res.json({ result: true, data: scene });
-    });
+  res.json({ result: true, data: scene });
+});
 });
 
 //Route pour envoyer une proposition d'un joueur donné à une scène donnée
