@@ -31,36 +31,37 @@ return text;
 }
 
 // Fonction pour créer le prompt de la première scène
-function createFirstPrompt(title, genre, nbScene) {
+function createFirstPrompt(title, genre, nbScene, public) {
   return `Écris le début d'une histoire interactive en français dans le genre ${genre}.
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
 - Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues
 - Titre à intégrer : ${title}
+- Public cible : ${public}
 
 **Style et ton :**
 - Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références)
+- Adapte le vocabulaire, les thèmes et la complexité au public ${public}
 - Style immersif et captivant, sans surcharge descriptive
 - Narration à la 2e ou 3e personne (varie selon le contexte)
 - Assure la variété entre les générations successives
 
 **Structure narrative :**
-- Établis rapidement le contexte et les enjeux
+- Établis rapidement le contexte et les enjeux adaptés au public ${public}
 - Termine par un cliffhanger marquant : tension, conflit, révélation ou question cruciale
 - Crée un momentum qui donne envie de connaître la suite
 
-**Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative.`;
+**Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative adapté au public ${public}.`;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
 function createNextPrompt(text, history, remainingScenes ) {
-  return `Écris en français la suite de l'histoire interactive.
-
-**Contexte narratif :**
+  return `**Contexte narratif :**
 - Historique des scènes : ${history}
 - Action choisie par les joueurs : "${text}"
 - Scènes restantes : ${remainingScenes}
+- Public cible : ${public}
 
 **Intégration de l'action :**
 - Incorpore naturellement l'action "${text}" dans la continuité narrative
@@ -68,17 +69,18 @@ function createNextPrompt(text, history, remainingScenes ) {
 - Assure une transition fluide avec les événements précédents
 
 **Contraintes techniques :**
-- Longueur : 400-600 caractères maximum
+- Longueur : 500-700 caractères maximum
 - Rythme : calibre l'avancement selon les ${remainingScenes} scènes restantes
 - Si peu de scènes restantes : accélère vers le dénouement
 - Si nombreuses scènes : développe progressivement les enjeux
 
 **Style narratif :**
 - Maintiens la cohérence stylistique avec l'historique
+- Adapte le contenu et le vocabulaire au public ${public}
 - Style immersif et captivant, sans lourdeur descriptive
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
-**Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
+**Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative adapté au public ${public}.`;
 ;
 }
 
@@ -89,6 +91,7 @@ function createLastPrompt(text) {
 **Contexte narratif :**
 - Historique des scènes : ${history}
 - Type de fin souhaitée : "${text}"
+- Public cible : ${public}
 
 **Résolution narrative :**
 - Intègre l'orientation de fin "${text}" de manière organique et narrative
@@ -97,17 +100,18 @@ function createLastPrompt(text) {
 - Assure une conclusion cohérente avec l'ensemble de l'histoire
 
 **Contraintes techniques :**
-- Longueur : 400-600 caractères maximum
+- Longueur : 500-700 caractères maximum
 - Structure : développement du climax + résolution + chute finale
 - Rythme : conclusion satisfaisante sans précipitation
 
 **Style narratif :**
 - Maintiens la cohérence stylistique avec l'historique complet
+- Adapte le dénouement et les messages au public ${public}
 - Style immersif et captivant, adapté au dénouement
 - Ton approprié selon le type de fin (tragique, héroïque, mystérieux, etc.)
 - Évite les fins abruptes : apporte une vraie conclusion
 
-**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif.`;
+**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif adapté au public ${public}.`;
 }
 
 //Route pour récupérer toutes les scènes d'une partie
