@@ -32,7 +32,7 @@ return text;
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre, nbScene, public) {
-  return `Écris le début d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
+  return `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
@@ -131,7 +131,7 @@ router.get("/:code", (req, res) => {
   });
 });
 
-//Route pour envoyer le titre et le genre à l'API pour générer la première scène
+//Route pour pour générer la première scène
 router.post("/firstScene", (req, res) => {
   const { code } = req.body;
 
@@ -144,8 +144,10 @@ router.post("/firstScene", (req, res) => {
   const gameId = game._id;
   const title = game.title;
   const genre = game.genre;
-  const prompt = createFirstPrompt(title, genre);
-
+  const nbScene = game.nbScenes;
+  const public = game.public;
+  const prompt = createFirstPrompt(title, genre, nbScene, public);
+  title, genre, nbScene, public
   return generateText(prompt).then((generatedText) => {
     if (!generatedText || generatedText.length === 0) {
       return res.json({
@@ -181,9 +183,9 @@ router.post("/firstScene", (req, res) => {
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
-  const { code, text, sceneNumber } = req.body;
+  const { text, history, remainingScenes, public } = req.body;
 
-  if (!code || !text) {
+  if (!code || !text ) {
     return res.json({ result: false, error: "Code and text required" });
   }
 
@@ -195,7 +197,7 @@ router.post("/nextScene", (req, res) => {
 //Incrémentation du numéro de scène
 Scenes.findOne({ game: game._id })
   .then(() => {
-    const prompt = createNextPrompt(text);
+    const prompt = createNextPrompt(text, history, remainingScenes, public);
 
     generateText(prompt).then((generatedText) => {
       if (!generatedText || generatedText.length === 0) {
@@ -226,7 +228,7 @@ Scenes.findOne({ game: game._id })
 
 //Route pour envoyer le texte à l'API pour générer la dernière scène
 router.post("/lastScene", (req, res) => {
-  const { code, text } = req.body;
+  const { text, history, public } = req.body;
 
   if (!code || !text) {
     return res.json({ result: false, error: "Code and text required" });
@@ -243,7 +245,7 @@ Scenes.findOne({ game: game._id })
   .then((lastScene) => {
     const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
 
-    const prompt = createLastPrompt(text);
+    const prompt = createLastPrompt(text, history, public);
 
     generateText(prompt).then((generatedText) => {
       if (!generatedText || generatedText.length === 0) {
