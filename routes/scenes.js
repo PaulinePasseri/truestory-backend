@@ -421,11 +421,16 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
   }
 
   // Trouver la proposition gagnante
-  const winner = scene.propositions.reduce(
+  const maxVotes = scene.propositions.reduce(
     (max, prop) => (prop.votes > max.votes ? prop : max),
     scene.propositions[0]
   );
 
+  const winnersWithMaxVotes = scene.propositions.filter(prop => prop.votes === maxVotes.votes);
+
+  const randomIndex = Math.floor(Math.random() * winnersWithMaxVotes.length);
+  const winner = winnersWithMaxVotes[randomIndex];
+  
   const user = await Users.findOne({ _id: winner.userId });
   if (!user) return res.json({ result: false, error: "User not found" });
 
@@ -439,5 +444,6 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
     },
   });
 });
+
 
 module.exports = router;
