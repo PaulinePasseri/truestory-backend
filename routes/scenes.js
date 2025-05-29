@@ -111,7 +111,7 @@ function createLastPrompt(text, history) {
 }
 
 //Route pour récupérer toutes les scènes d'une partie
-router.get("/:code", (req, res) => {
+router.get("/all/:code", (req, res) => {
   const { code } = req.params;
   Games.findOne({ code }).then((game) => {
     if (!game) {
