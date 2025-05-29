@@ -10,6 +10,7 @@ router.post("/create/:token", (req, res) => {
     if (!user) {
       return res.json({ result: false, error: "Invalid token" });
     }
+    
     // Fonction pour générer un code de jeu aléatoire
     function generateGameCode(length = 5) {
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -21,28 +22,54 @@ router.post("/create/:token", (req, res) => {
     }
 
     const userId = user._id;
-    const newGames = new Games({
-      status: true, // true si la partie est en cours
-      started: false, // false si la partie n'a pas encore commencé 
-      code: generateGameCode(5),
-      title: req.body.title,
-      image: req.body.image,
-      nbPlayers: req.body.nbPlayers,
-      nbScenes: req.body.nbScenes,
-      genre: req.body.genre,
-      winner: null,
-      hostId: userId,
-      usersId: [userId], // Ajout de l'utilisateur créateur de la partie
+    let gameCode = generateGameCode(5);
+    
+    // Vérification que le code n'existe pas déjà
+    Games.findOne({ code: gameCode }).then((existingGame) => {
+      // Si le code existe, on en génère un nouveau
+      if (existingGame) {
+        // Boucle jusqu'à trouver un code unique
+        const checkCode = () => {
+          gameCode = generateGameCode(5);
+          Games.findOne({ code: gameCode }).then((game) => {
+            if (game) {
+              checkCode(); // Récursion si le code existe encore
+            } else {
+              createGame(); // Créer la partie si le code est unique
+            }
+          });
+        };
+        checkCode();
+      } else {
+        createGame(); // Créer la partie si le code est unique
+      }
     });
-  
-    newGames.save().then((newDoc) => {
-      res.json({
-        result: true,
-        code: newDoc.code,
-        title: newDoc.title,
-        genre: newDoc.genre,
+
+    function createGame() {
+      const newGames = new Games({
+        status: true, // true si la partie est en cours
+        started: false, // false si la partie n'a pas encore commencé 
+        code: gameCode,
+        title: req.body.title,
+        image: req.body.image,
+        public: req.body.public,
+        genre: req.body.genre,
+        nbPlayers: req.body.nbPlayers,
+        nbScenes: req.body.nbScenes,
+        winner: null,
+        hostId: userId,
+        usersId: [userId], // Ajout de l'utilisateur créateur de la partie
       });
-    });
+    
+      newGames.save().then((newDoc) => {
+        res.json({
+          result: true,
+          code: newDoc.code,
+          title: newDoc.title,
+          genre: newDoc.genre,
+        });
+      });
+    }
   });
 });
 
