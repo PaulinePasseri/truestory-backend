@@ -208,7 +208,7 @@ router.post("/firstScene", (req, res) => {
 
           const firstScene = new Scenes({
             game: gameId,
-            status: false,
+            status: true, // si la scène est en cours
             sceneNumber: 1,
             voteWinner: null,
             propositions: [],
@@ -266,7 +266,7 @@ router.post("/nextScene", (req, res) => {
 
         const newScene = new Scenes({
           game: game._id,
-          status: false,
+          status: true,
           sceneNumber: sceneNumber,
           text: generatedText,
           voteWinner: null,
@@ -339,6 +339,99 @@ router.post("/lastScene", (req, res) => {
       });
     });
   });
+});
+
+router.put("/status/:code/:sceneNumber", async (req, res) => {
+  const { code, sceneNumber } = req.params;
+
+  try {
+    console.log(`PUT Status - Code: ${code}, Scene: ${sceneNumber}`);
+
+    if (!code || !sceneNumber) {
+      return res.json({
+        result: false,
+        error: "Code and sceneNumber required",
+      });
+    }
+
+    const game = await Games.findOne({ code });
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+
+    const updateResult = await Scenes.updateOne(
+      {
+        game: game._id,
+        sceneNumber: Number(sceneNumber),
+      },
+      {
+        $set: { status: false },
+      }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      const existingScene = await Scenes.findOne({
+        game: game._id,
+        sceneNumber: Number(sceneNumber),
+      });
+
+      if (!existingScene) {
+        return res.json({ result: false, error: "Scene not found" });
+      } else {
+        return res.json({
+          result: true,
+          message: "Scene status already false",
+        });
+      }
+    }
+
+    console.log("Statut modifié avec succès");
+    return res.json({ result: true, message: "Scene status updated to false" });
+  } catch (error) {
+    console.error("Erreur PUT status:", error);
+    return res.json({ result: false, error: "Internal server error" });
+  }
+});
+
+//Route pour récupérer le statut d'une scène
+router.get("/status/:code/:sceneNumber", async (req, res) => {
+  const { code, sceneNumber } = req.params;
+
+  try {
+    console.log(`GET Status - Code: ${code}, Scene: ${sceneNumber}`);
+
+    if (!code || !sceneNumber) {
+      return res.json({
+        result: false,
+        error: "Code and sceneNumber required",
+      });
+    }
+
+    const game = await Games.findOne({ code });
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+
+    const scene = await Scenes.findOne({
+      game: game._id,
+      sceneNumber: Number(sceneNumber),
+    });
+
+    if (!scene) {
+      return res.json({ result: false, error: "Scene not found" });
+    }
+    console.log(scene.status);
+    return res.json({
+      result: true,
+      data: {
+        status: scene.status,
+        sceneNumber: scene.sceneNumber,
+      },
+    });
+  } catch (error) {
+    console.error("Erreur GET status:", error);
+    return res.json({ result: false, error: "Internal server error" });
+  }
 });
 
 //Route pour récupérer une scène et ses propositions
@@ -508,6 +601,7 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
       text: winner.text,
       votes: winner.votes,
       avatar: user.avatar,
+      status: scene.status,
     },
   });
 });

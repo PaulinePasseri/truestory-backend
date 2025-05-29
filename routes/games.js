@@ -23,6 +23,7 @@ router.post("/create/:token", (req, res) => {
     const userId = user._id;
     const newGames = new Games({
       status: true, // true si la partie est en cours
+      started: false, // false si la partie n'a pas encore commencé 
       code: generateGameCode(5),
       title: req.body.title,
       image: req.body.image,
@@ -44,6 +45,17 @@ router.post("/create/:token", (req, res) => {
     });
   });
 });
+
+// Lancement de la partie 
+router.put("/start/:code", (req, res) => {
+  Games.updateOne({ code: req.params.code }, { started: true }).then((data) => {
+    if (data.modifiedCount === 0) {
+      res.json({result: false, message: 'Game not started'})
+    } else {
+      res.json({result: true, message: 'Game successfully started'})
+    }
+  })
+})
 
 // Récupération des informations de la partie
 router.get("/game/:code", (req, res) => {
