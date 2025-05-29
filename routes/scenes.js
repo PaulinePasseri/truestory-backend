@@ -66,7 +66,6 @@ function createFirstPrompt(title, genre, nbScene, public) {
   return prompt;
 }
 
-
 // Fonction pour créer le prompt pour les scènes suivantes
 function createNextPrompt(text, history, remainingScenes, public) {
   let prompt = `Écris en français la suite de l'histoire interactive pour les ${public}.
@@ -101,7 +100,8 @@ function createNextPrompt(text, history, remainingScenes, public) {
   // Pour l'exemple, j'ajoute une condition générique.
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
   // Pour cette démo, je vais juste simuler la condition si 'public' était disponible.
-  if (history.includes("enfant")) { // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
+  if (history.includes("enfant")) {
+    // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
     prompt += `
 **Adaptation public "enfant" (6 ans) :**
 - Vocabulaire simple et phrases courtes.
@@ -142,7 +142,8 @@ function createLastPrompt(text, history, public) {
 
   // Ajout de la spécificité pour le public "enfant"
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
-  if (history.includes("enfant")) { // Simulation
+  if (history.includes("enfant")) {
+    // Simulation
     prompt += `
 **Adaptation public "enfant" (6 ans) :**
 - Vocabulaire simple et phrases courtes.
@@ -174,50 +175,47 @@ router.get("/all/:code", (req, res) => {
 router.post("/firstScene", (req, res) => {
   const { code } = req.body;
 
-  Games.findOne({ code: code })
-    .then((game) => {
-      if (!game) {
-        return res.json({ result: false, error: "Game not found" });
+  Games.findOne({ code: code }).then((game) => {
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+
+    const gameId = game._id;
+    const title = game.title;
+    const genre = game.genre;
+    const nbScene = game.nbScenes;
+    const public = game.public;
+    const prompt = createFirstPrompt(title, genre, nbScene, public);
+    title, genre, nbScene, public;
+    return generateText(prompt).then((generatedText) => {
+      if (!generatedText || generatedText.length === 0) {
+        return res.json({
+          result: false,
+          error: "L'API do not generate text",
+        });
       }
 
-      const gameId = game._id;
-      const title = game.title;
-      const genre = game.genre;
-      const nbScene = game.nbScenes;
-      const public = game.public;
-      const prompt = createFirstPrompt(title, genre, nbScene, public);
-      title, genre, nbScene, public;
-      return generateText(prompt).then((generatedText) => {
-        if (!generatedText || generatedText.length === 0) {
-          return res.json({
-            result: false,
-            error: "L'API do not generate text",
+      console.log("Texte généré:", generatedText);
+      Scenes.findOne({ game: gameId, sceneNumber: 1 }).then((data) => {
+        if (data === null) {
+          const firstScene = new Scenes({
+            game: gameId,
+            status: false,
+            sceneNumber: 1,
+            voteWinner: null,
+            propositions: [],
+            text: generatedText,
           });
+
+          return firstScene.save().then((savedScene) => {
+            res.json({ result: true, data: savedScene });
+          });
+        } else {
+          res.json({ result: false, message: "Scene already exists" });
         }
-
-        console.log("Texte généré:", generatedText);
-
-        const firstScene = new Scenes({
-          game: gameId,
-          status: false,
-          sceneNumber: 1,
-          voteWinner: null,
-          propositions: [],
-          text: generatedText,
-        });
-
-        return firstScene.save().then((savedScene) => {
-          res.json({ result: true, data: savedScene });
-        });
-      });
-    })
-    .catch((error) => {
-      console.error("Erreur dans /firstScene:", error);
-      res.json({
-        result: false,
-        error: "Error while generating the first scene",
       });
     });
+  });
 });
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
@@ -234,32 +232,42 @@ router.post("/nextScene", (req, res) => {
     }
     const public = game.public;
 
-    //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id }).then(() => {
-      const prompt = createNextPrompt(text, history, remainingScenes, public);
+    Scenes.findOne({ game: game._id, sceneNumber: sceneNumber }).then(
+      (data) => {
+        if (data === null) {
+          const prompt = createNextPrompt(
+            text,
+            history,
+            remainingScenes,
+            public
+          );
 
-      generateText(prompt).then((generatedText) => {
-        if (!generatedText || generatedText.length === 0) {
-          return res.json({
-            result: false,
-            error: "Api do not generate text",
+          generateText(prompt).then((generatedText) => {
+            if (!generatedText || generatedText.length === 0) {
+              return res.json({
+                result: false,
+                error: "Api do not generate text",
+              });
+            }
+
+            const newScene = new Scenes({
+              game: game._id,
+              status: false,
+              sceneNumber: sceneNumber,
+              text: generatedText,
+              voteWinner: null,
+              propositions: [],
+            });
+
+            newScene.save().then((savedScene) => {
+              res.json({ result: true, data: savedScene });
+            });
           });
+        } else {
+          res.json({ result: false, message: "Scene already exists" });
         }
-
-        const newScene = new Scenes({
-          game: game._id,
-          status: false,
-          sceneNumber: sceneNumber,
-          text: generatedText,
-          voteWinner: null,
-          propositions: [],
-        });
-
-        newScene.save().then((savedScene) => {
-          res.json({ result: true, data: savedScene });
-        });
-      });
-    });
+      }
+    );
   });
 });
 
@@ -278,40 +286,37 @@ router.post("/lastScene", (req, res) => {
     const public = game.public;
 
     //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id }).then(() => {
-      const prompt = createLastPrompt(text, history, public);
+    Scenes.findOne({ game: game._id, sceneNumber: sceneNumber }).then(
+      (data) => {
+        if (data === null) {
+          const prompt = createLastPrompt(text, history, public);
 
-      generateText(prompt).then((generatedText) => {
-        if (!generatedText || generatedText.length === 0) {
-          return res.json({
-            result: false,
-            error: "Api do not generate text",
-          });
-        }
+          generateText(prompt).then((generatedText) => {
+            if (!generatedText || generatedText.length === 0) {
+              return res.json({
+                result: false,
+                error: "Api do not generate text",
+              });
+            }
 
-        const newScene = new Scenes({
-          game: game._id,
-          status: true,
-          sceneNumber: sceneNumber,
-          text: generatedText,
-          voteWinner: null,
-          propositions: [],
-        });
+            const newScene = new Scenes({
+              game: game._id,
+              status: true,
+              sceneNumber: sceneNumber,
+              text: generatedText,
+              voteWinner: null,
+              propositions: [],
+            });
 
-        newScene
-          .save()
-          .then((savedScene) => {
-            res.json({ result: true, data: savedScene });
-          })
-          .catch((err) => {
-            console.error("Error", err);
-            res.json({
-              result: false,
-              error: "Error",
+            newScene.save().then((savedScene) => {
+              res.json({ result: true, data: savedScene });
             });
           });
-      });
-    });
+        } else {
+          res.json({ result: false, message: 'Scene already exists'})
+        }
+      }
+    );
   });
 });
 
