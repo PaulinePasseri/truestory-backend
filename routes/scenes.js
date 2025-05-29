@@ -66,7 +66,6 @@ function createFirstPrompt(title, genre, nbScene, public) {
   return prompt;
 }
 
-
 // Fonction pour créer le prompt pour les scènes suivantes
 function createNextPrompt(text, history, remainingScenes, public) {
   let prompt = `Écris en français la suite de l'histoire interactive pour les ${public}.
@@ -101,7 +100,8 @@ function createNextPrompt(text, history, remainingScenes, public) {
   // Pour l'exemple, j'ajoute une condition générique.
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
   // Pour cette démo, je vais juste simuler la condition si 'public' était disponible.
-  if (history.includes("enfant")) { // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
+  if (history.includes("enfant")) {
+    // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
     prompt += `
 **Adaptation public "enfant" (6 ans) :**
 - Vocabulaire simple et phrases courtes.
@@ -142,7 +142,8 @@ function createLastPrompt(text, history, public) {
 
   // Ajout de la spécificité pour le public "enfant"
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
-  if (history.includes("enfant")) { // Simulation
+  if (history.includes("enfant")) {
+    // Simulation
     prompt += `
 **Adaptation public "enfant" (6 ans) :**
 - Vocabulaire simple et phrases courtes.
@@ -170,7 +171,7 @@ router.get("/all/:code", (req, res) => {
   });
 });
 
-//Route pour pour générer la première scène
+// Route pour générer la première scène
 router.post("/firstScene", (req, res) => {
   const { code } = req.body;
 
@@ -184,30 +185,39 @@ router.post("/firstScene", (req, res) => {
       const title = game.title;
       const genre = game.genre;
       const nbScene = game.nbScenes;
-      const public = game.public;
-      const prompt = createFirstPrompt(title, genre, nbScene, public);
-      title, genre, nbScene, public;
-      return generateText(prompt).then((generatedText) => {
-        if (!generatedText || generatedText.length === 0) {
+      const isPublic = game.public;
+
+      // Vérification si la scène 1 existe déjà
+      Scenes.findOne({ game: gameId, sceneNumber: 1 }).then((existingScene) => {
+        if (existingScene) {
           return res.json({
             result: false,
-            error: "L'API do not generate text",
+            error: "Scene 1 already exists",
           });
         }
 
-        console.log("Texte généré:", generatedText);
-        
-        const firstScene = new Scenes({
-          game: gameId,
-          status: false,
-          sceneNumber: 1,
-          voteWinner: null,
-          propositions: [],
-          text: generatedText,
-        });
+        const prompt = createFirstPrompt(title, genre, nbScene, isPublic);
 
-        return firstScene.save().then((savedScene) => {
-          res.json({ result: true, data: savedScene });
+        generateText(prompt).then((generatedText) => {
+          if (!generatedText || generatedText.length === 0) {
+            return res.json({
+              result: false,
+              error: "L'API do not generate text",
+            });
+          }
+
+          const firstScene = new Scenes({
+            game: gameId,
+            status: false,
+            sceneNumber: 1,
+            voteWinner: null,
+            propositions: [],
+            text: generatedText,
+          });
+
+          firstScene.save().then((savedScene) => {
+            res.json({ result: true, data: savedScene });
+          });
         });
       });
     })
@@ -220,7 +230,7 @@ router.post("/firstScene", (req, res) => {
     });
 });
 
-//Route pour envoyer le texte à l'API pour générer la scène suivante
+// Route pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
   const { code, text, history, remainingScenes, sceneNumber } = req.body;
 
@@ -232,11 +242,19 @@ router.post("/nextScene", (req, res) => {
     if (!game) {
       return res.json({ result: false, error: "Game not found" });
     }
-    const public = game.public;
 
-    //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id }).then(() => {
-      const prompt = createNextPrompt(text, history, remainingScenes, public);
+    const isPublic = game.public;
+
+    // Vérification si la scène existe déjà
+    Scenes.findOne({ game: game._id, sceneNumber }).then((existingScene) => {
+      if (existingScene) {
+        return res.json({
+          result: false,
+          error: `Scene ${sceneNumber} already exists`,
+        });
+      }
+
+      const prompt = createNextPrompt(text, history, remainingScenes, isPublic);
 
       generateText(prompt).then((generatedText) => {
         if (!generatedText || generatedText.length === 0) {
@@ -263,7 +281,7 @@ router.post("/nextScene", (req, res) => {
   });
 });
 
-//Route pour envoyer le texte à l'API pour générer la dernière scène
+// Route pour générer la dernière scène
 router.post("/lastScene", (req, res) => {
   const { code, text, history, sceneNumber } = req.body;
 
@@ -275,11 +293,19 @@ router.post("/lastScene", (req, res) => {
     if (!game) {
       return res.json({ result: false, error: "Game not found" });
     }
-    const public = game.public;
 
-    //Incrémentation du numéro de scène
-    Scenes.findOne({ game: game._id }).then(() => {
-      const prompt = createLastPrompt(text, history, public);
+    const isPublic = game.public;
+
+    // Vérification si la scène existe déjà
+    Scenes.findOne({ game: game._id, sceneNumber }).then((existingScene) => {
+      if (existingScene) {
+        return res.json({
+          result: false,
+          error: `Scene ${sceneNumber} already exists`,
+        });
+      }
+
+      const prompt = createLastPrompt(text, history, isPublic);
 
       generateText(prompt).then((generatedText) => {
         if (!generatedText || generatedText.length === 0) {

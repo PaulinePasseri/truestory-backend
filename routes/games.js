@@ -3,7 +3,6 @@ var router = express.Router();
 
 const Games = require("../models/games");
 const User = require("../models/users");
-const uid2 = require("uid2");
 
 // Route création de partie
 router.post("/create/:token", (req, res) => {
@@ -31,6 +30,7 @@ router.post("/create/:token", (req, res) => {
       nbScenes: req.body.nbScenes,
       genre: req.body.genre,
       winner: null,
+      hostId: userId,
       usersId: [userId], // Ajout de l'utilisateur créateur de la partie
     });
   
