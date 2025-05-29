@@ -15,15 +15,15 @@ async function generateText(prompt) {
     // Utiliser le nouveau nom de modèle
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const result = await model.generateContent(prompt);
-const response = await result.response;
-const text = response.text();
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-if (!text) {
-  throw new Error("No text generate by API.");
-}
+    if (!text) {
+      throw new Error("No text generate by API.");
+    }
 
-return text;
+    return text;
   } catch (error) {
     console.error("Error with API :", error.message);
     throw error;
@@ -54,7 +54,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, history, remainingScenes ) {
+function createNextPrompt(text, history, remainingScenes) {
   return `Écris en français la suite de l'histoire interactive.
 
 **Contexte narratif :**
@@ -79,7 +79,6 @@ function createNextPrompt(text, history, remainingScenes ) {
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
 **Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
-;
 }
 
 // Fonction pour créer le prompt de la dernière scène
@@ -137,95 +136,49 @@ router.post("/firstScene", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
-  const gameId = game._id;
-  const title = game.title;
-  const genre = game.genre;
-  const nbScene = game.nbScenes;
-  const public = game.public;
-  const prompt = createFirstPrompt(title, genre, nbScene, public);
-  title, genre, nbScene, public
-  return generateText(prompt).then((generatedText) => {
-    if (!generatedText || generatedText.length === 0) {
-      return res.json({
-        result: false,
-        error: "L'API do not generate text",
+      const gameId = game._id;
+      const title = game.title;
+      const genre = game.genre;
+      const nbScene = game.nbScenes;
+      const public = game.public;
+      const prompt = createFirstPrompt(title, genre, nbScene, public);
+      title, genre, nbScene, public;
+      return generateText(prompt).then((generatedText) => {
+        if (!generatedText || generatedText.length === 0) {
+          return res.json({
+            result: false,
+            error: "L'API do not generate text",
+          });
+        }
+
+        console.log("Texte généré:", generatedText);
+
+        const firstScene = new Scenes({
+          game: gameId,
+          status: false,
+          sceneNumber: 1,
+          voteWinner: null,
+          propositions: [],
+          text: generatedText,
+        });
+
+        return firstScene.save().then((savedScene) => {
+          res.json({ result: true, data: savedScene });
+        });
       });
-    }
-
-    console.log("Texte généré:", generatedText);
-
-    const firstScene = new Scenes({
-      game: gameId,
-      status: false,
-      sceneNumber: 1,
-      voteWinner: null,
-      propositions: [],
-      text: generatedText,
+    })
+    .catch((error) => {
+      console.error("Erreur dans /firstScene:", error);
+      res.json({
+        result: false,
+        error: "Error while generating the first scene",
+      });
     });
-
-    return firstScene.save().then((savedScene) => {
-      res.json({ result: true, data: savedScene });
-    });
-  });
-})
-.catch((error) => {
-  console.error("Erreur dans /firstScene:", error);
-  res.json({
-    result: false,
-    error: "Error while generating the first scene",
-  });
-});
 });
 
 //Route pour envoyer le texte à l'API pour générer la scène suivante
 router.post("/nextScene", (req, res) => {
   const { code, text, history, remainingScenes, sceneNumber } = req.body;
-
-  if (!code || !text ) {
-    return res.json({ result: false, error: "Code and text required" });
-  }
-
-  Games.findOne({ code }).then((game) => {
-    if (!game) {
-      return res.json({ result: false, error: "Game not found" });
-    }
-    const public = game.public
-
-//Incrémentation du numéro de scène
-Scenes.findOne({ game: game._id })
-  .then(() => {
-    const prompt = createNextPrompt(text, history, remainingScenes, public);
-
-    generateText(prompt).then((generatedText) => {
-      if (!generatedText || generatedText.length === 0) {
-        return res.json({
-          result: false,
-          error: "Api do not generate text",
-        });
-      }
-
-      const newScene = new Scenes({
-        game: game._id,
-        status: false,
-        sceneNumber: sceneNumber,
-        text: generatedText,
-        voteWinner: null,
-        propositions: [],
-      });
-
-      newScene
-        .save()
-        .then((savedScene) => {
-          res.json({ result: true, data: savedScene });
-        })
-    });
-  });
-  });
-});
-
-//Route pour envoyer le texte à l'API pour générer la dernière scène
-router.post("/lastScene", (req, res) => {
-  const { code, text, history } = req.body;
 
   if (!code || !text) {
     return res.json({ result: false, error: "Code and text required" });
@@ -235,47 +188,86 @@ router.post("/lastScene", (req, res) => {
     if (!game) {
       return res.json({ result: false, error: "Game not found" });
     }
-    const public = game.public
+    const public = game.public;
 
-//Incrémentation du numéro de scène
-Scenes.findOne({ game: game._id })
-  .sort({ sceneNumber: -1 })
-  .then((lastScene) => {
-    const nextSceneNumber = lastScene ? lastScene.sceneNumber + 1 : 2;
+    //Incrémentation du numéro de scène
+    Scenes.findOne({ game: game._id }).then(() => {
+      const prompt = createNextPrompt(text, history, remainingScenes, public);
 
-    const prompt = createLastPrompt(text, history, public);
-
-    generateText(prompt).then((generatedText) => {
-      if (!generatedText || generatedText.length === 0) {
-        return res.json({
-          result: false,
-          error: "Api do not generate text",
-        });
-      }
-
-      const newScene = new Scenes({
-        game: game._id,
-        status: false,
-        sceneNumber: nextSceneNumber,
-        text: generatedText,
-        voteWinner: null,
-        propositions: [],
-      });
-
-      newScene
-        .save()
-        .then((savedScene) => {
-          res.json({ result: true, data: savedScene });
-        })
-        .catch((err) => {
-          console.error("Error", err);
-          res.json({
+      generateText(prompt).then((generatedText) => {
+        if (!generatedText || generatedText.length === 0) {
+          return res.json({
             result: false,
-            error: "Error",
+            error: "Api do not generate text",
           });
+        }
+
+        const newScene = new Scenes({
+          game: game._id,
+          status: false,
+          sceneNumber: sceneNumber,
+          text: generatedText,
+          voteWinner: null,
+          propositions: [],
         });
+
+        newScene.save().then((savedScene) => {
+          res.json({ result: true, data: savedScene });
+        });
+      });
     });
   });
+});
+
+//Route pour envoyer le texte à l'API pour générer la dernière scène
+router.post("/lastScene", (req, res) => {
+  const { code, text, history, sceneNumber } = req.body;
+
+  if (!code || !text) {
+    return res.json({ result: false, error: "Code and text required" });
+  }
+
+  Games.findOne({ code }).then((game) => {
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+    const public = game.public;
+
+    //Incrémentation du numéro de scène
+    Scenes.findOne({ game: game._id }).then(() => {
+      const prompt = createLastPrompt(text, history, public);
+
+      generateText(prompt).then((generatedText) => {
+        if (!generatedText || generatedText.length === 0) {
+          return res.json({
+            result: false,
+            error: "Api do not generate text",
+          });
+        }
+
+        const newScene = new Scenes({
+          game: game._id,
+          status: true,
+          sceneNumber: sceneNumber,
+          text: generatedText,
+          voteWinner: null,
+          propositions: [],
+        });
+
+        newScene
+          .save()
+          .then((savedScene) => {
+            res.json({ result: true, data: savedScene });
+          })
+          .catch((err) => {
+            console.error("Error", err);
+            res.json({
+              result: false,
+              error: "Error",
+            });
+          });
+      });
+    });
   });
 });
 
@@ -294,19 +286,19 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
         return res.json({ result: false, error: "Game not found" });
       }
 
-  console.log(game._id, typeof game._id);
-  return Scenes.findOne({
-    game: game._id,
-    sceneNumber: Number(sceneNumber),
-  });
-})
-.then((scene) => {
-  if (!scene) {
-    return res.json({ result: false, error: "Scene not found" });
-  }
+      console.log(game._id, typeof game._id);
+      return Scenes.findOne({
+        game: game._id,
+        sceneNumber: Number(sceneNumber),
+      });
+    })
+    .then((scene) => {
+      if (!scene) {
+        return res.json({ result: false, error: "Scene not found" });
+      }
 
-  res.json({ result: true, data: scene });
-});
+      res.json({ result: true, data: scene });
+    });
 });
 
 //Route pour envoyer une proposition d'un joueur donné à une scène donnée
@@ -430,10 +422,12 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
     scene.propositions[0]
   );
 
-  const winnersWithMaxVotes = scene.propositions.filter(prop => prop.votes === maxVotes.votes);
+  const winnersWithMaxVotes = scene.propositions.filter(
+    (prop) => prop.votes === maxVotes.votes
+  );
 
   const winner = winnersWithMaxVotes[0];
-  
+
   const user = await Users.findOne({ _id: winner.userId });
   if (!user) return res.json({ result: false, error: "User not found" });
 
@@ -447,6 +441,5 @@ router.get("/voteWinner/:code/:sceneNumber", async (req, res) => {
     },
   });
 });
-
 
 module.exports = router;
