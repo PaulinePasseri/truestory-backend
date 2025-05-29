@@ -35,7 +35,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
   let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire.
 
 **Contraintes techniques :**
-- Longueur : 500-700 caractères maximum
+- Longueur : 400-600 caractères maximum
 - Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues mais ne génère qu'une seule scène
 - Titre à intégrer : ${title}
 
