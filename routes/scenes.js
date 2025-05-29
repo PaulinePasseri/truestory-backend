@@ -68,13 +68,8 @@ function createFirstPrompt(title, genre, nbScene, public) {
 
 
 // Fonction pour créer le prompt pour les scènes suivantes
-<<<<<<< HEAD
 function createNextPrompt(text, history, remainingScenes, public) {
   let prompt = `Écris en français la suite de l'histoire interactive pour les ${public}.
-=======
-function createNextPrompt(text, history, remainingScenes) {
-  return `Écris en français la suite de l'histoire interactive.
->>>>>>> 81463106c8f53bb022d7b7d07ec087bbd9952d7a
 
 **Contexte narratif :**
 - Historique des scènes : ${history}
@@ -100,7 +95,6 @@ function createNextPrompt(text, history, remainingScenes) {
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
 **Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
-<<<<<<< HEAD
 
   // Ajout de la spécificité pour le public "enfant"
   // Note: Tu devras passer le paramètre 'public' à cette fonction aussi si tu veux qu'elle l'utilise.
@@ -116,8 +110,6 @@ function createNextPrompt(text, history, remainingScenes) {
   }
 
   return prompt;
-=======
->>>>>>> 81463106c8f53bb022d7b7d07ec087bbd9952d7a
 }
 
 // Fonction pour créer le prompt de la dernière scène
