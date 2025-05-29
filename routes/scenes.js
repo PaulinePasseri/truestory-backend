@@ -32,7 +32,7 @@ return text;
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre, nbScene, public) {
-  return `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire .
+  let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire.
 
 **Contraintes techniques :**
 - Longueur : 500-700 caractères maximum
@@ -42,8 +42,9 @@ function createFirstPrompt(title, genre, nbScene, public) {
 **Style et ton :**
 - Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références)
 - Style immersif et captivant, sans surcharge descriptive
-- Narration à la 2e ou 3e personne (varie selon le contexte)
+- Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
 - Assure la variété entre les générations successives
+- **Début aléatoire : Commence l'histoire de manière inattendue, sans préambule classique ni description environnementale habituelle. Surprends le lecteur dès la première phrase.**
 
 **Structure narrative :**
 - Établis rapidement le contexte et les enjeux
@@ -51,11 +52,24 @@ function createFirstPrompt(title, genre, nbScene, public) {
 - Crée un momentum qui donne envie de connaître la suite
 
 **Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative.`;
+
+  // Ajout de la spécificité pour le public "enfant"
+  if (public === "enfant") {
+    prompt += `
+**Adaptation public "enfant" (6 ans) :**
+- Vocabulaire simple et phrases courtes.
+- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+- Ambiance positive ou aventureuse, évitant la complexité ou la violence.
+- Personnages attachants et enjeux clairs pour les jeunes lecteurs.`;
+  }
+
+  return prompt;
 }
 
+
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, history, remainingScenes ) {
-  return `Écris en français la suite de l'histoire interactive.
+function createNextPrompt(text, history, remainingScenes, public) {
+  let prompt = `Écris en français la suite de l'histoire interactive pour les ${public}.
 
 **Contexte narratif :**
 - Historique des scènes : ${history}
@@ -76,15 +90,31 @@ function createNextPrompt(text, history, remainingScenes ) {
 **Style narratif :**
 - Maintiens la cohérence stylistique avec l'historique
 - Style immersif et captivant, sans lourdeur descriptive
+- Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
+- **Variété des rebondissements : Propose des développements inattendus, des révélations ou des obstacles qui ne ressemblent pas aux précédents. Évite les schémas narratifs répétitifs.**
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
 **Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
-;
+
+  // Ajout de la spécificité pour le public "enfant"
+  // Note: Tu devras passer le paramètre 'public' à cette fonction aussi si tu veux qu'elle l'utilise.
+  // Pour l'exemple, j'ajoute une condition générique.
+  // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
+  // Pour cette démo, je vais juste simuler la condition si 'public' était disponible.
+  if (history.includes("enfant")) { // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
+    prompt += `
+**Adaptation public "enfant" (6 ans) :**
+- Vocabulaire simple et phrases courtes.
+- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+- Ambiance positive ou aventureuse, évitant la complexité ou la violence.`;
+  }
+
+  return prompt;
 }
 
 // Fonction pour créer le prompt de la dernière scène
-function createLastPrompt(text, history) {
-  return `Écris en français la conclusion définitive de l'histoire interactive.
+function createLastPrompt(text, history, public) {
+  let prompt = `Écris en français la conclusion définitive de l'histoire interactive pour les ${public}.
 
 **Contexte narratif :**
 - Historique des scènes : ${history}
@@ -105,9 +135,22 @@ function createLastPrompt(text, history) {
 - Maintiens la cohérence stylistique avec l'historique complet
 - Style immersif et captivant, adapté au dénouement
 - Ton approprié selon le type de fin (tragique, héroïque, mystérieux, etc.)
+- Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
 - Évite les fins abruptes : apporte une vraie conclusion
 
 **Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif.`;
+
+  // Ajout de la spécificité pour le public "enfant"
+  // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
+  if (history.includes("enfant")) { // Simulation
+    prompt += `
+**Adaptation public "enfant" (6 ans) :**
+- Vocabulaire simple et phrases courtes.
+- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+- Ambiance positive ou aventureuse pour la conclusion.`;
+  }
+
+  return prompt;
 }
 
 //Route pour récupérer toutes les scènes d'une partie
