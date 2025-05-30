@@ -32,24 +32,28 @@ async function generateText(prompt) {
 
 // Fonction pour créer le prompt de la première scène
 function createFirstPrompt(title, genre, nbScene, public) {
-  let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre} et en prenant en compte le ${title} qui donneront le ton et la direction de l'histoire.
+  let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre}, qui donnera le ton et la direction de l'histoire.
+
+**Contexte et Protagonistes :**
+- Décris plus en détail le contexte de l'histoire. Qui sont les personnages principaux (avec des noms uniques à chaque nouvelle histoire) ? Quelle est leur situation initiale ?
+- Intègre l'idée ou le thème principal du "${title}" de manière organique dans le récit initial.
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
-- Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues mais ne génère qu'une seule scène
-- Titre à intégrer : ${title}
+- Rythme narratif : adapte la progression de l'intrigue selon ${nbScene} scènes prévues mais ne génère qu'une seule scène.
+- Le titre de l'histoire à prendre en compte pour l'inspiration est : "${title}".
 
 **Style et ton :**
-- Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références)
-- Style immersif et captivant, sans surcharge descriptive
-- Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
-- Assure la variété entre les générations successives
+- Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références). Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt que l'absurde pur.
+- Style immersif et captivant, sans surcharge descriptive.
+- Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste).
+- Assure la variété entre les générations successives.
 - **Début aléatoire : Commence l'histoire de manière inattendue, sans préambule classique ni description environnementale habituelle. Surprends le lecteur dès la première phrase.**
 
 **Structure narrative :**
-- Établis rapidement le contexte et les enjeux
-- Termine par un cliffhanger marquant : tension, conflit, révélation ou question cruciale
-- Crée un momentum qui donne envie de connaître la suite
+- Établis rapidement le contexte, les personnages principaux et leurs enjeux.
+- Termine par un cliffhanger marquant : tension, conflit, révélation ou question cruciale.
+- Crée un momentum qui donne envie de connaître la suite.
 
 **Important :** Ne propose AUCUN choix à la fin. L'histoire doit s'arrêter sur la tension narrative.`;
 
@@ -104,7 +108,7 @@ function createNextPrompt(text, history, remainingScenes, public) {
     // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
     prompt += `
 **Adaptation public "enfant" (6 ans) :**
-- Vocabulaire simple et phrases courtes.
+- Vocabulaire simple et phrases courtes, jamais de vulgarité.
 - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
 - Ambiance positive ou aventureuse, évitant la complexité ou la violence.`;
   }
