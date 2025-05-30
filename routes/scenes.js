@@ -35,7 +35,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
   let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre}, qui donnera le ton et la direction de l'histoire.
 
 **Contexte et Protagonistes :**
-- Décris plus en détail le contexte de l'histoire. Qui sont les personnages principaux (avec des noms uniques à chaque nouvelle histoire) ? Quelle est leur situation initiale ?
+- Décris plus en détail le contexte de l'histoire. Qui sont les personnages principaux ? Donne-leur des **prénoms originaux et variés** (pas de répétition d’une histoire à l’autre)
 - Intègre l'idée ou le thème principal du "${title}" de manière organique dans le récit initial.
 
 **Contraintes techniques :**
@@ -45,6 +45,8 @@ function createFirstPrompt(title, genre, nbScene, public) {
 
 **Style et ton :**
 - Adopte les codes du genre ${genre} (atmosphère, vocabulaire, références). Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt que l'absurde pur.
+Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt que l'absurde pur.
++ Si le genre est "comédie", privilégie l'humour **logique et contextuel** (quiproquos, maladresses, dialogues amusants), évite les situations incohérentes, les non-sens ou les blagues absurdes.
 - Style immersif et captivant, sans surcharge descriptive.
 - Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste).
 - Assure la variété entre les générations successives.
@@ -60,14 +62,11 @@ function createFirstPrompt(title, genre, nbScene, public) {
   // Ajout de la spécificité pour le public "enfant"
   if (public === "enfant") {
     prompt += `
-**Adaptation public "enfant" (6 ans) :**
-- Vocabulaire simple et phrases courtes.
-- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
-- Ambiance positive ou aventureuse, évitant la complexité ou la violence.
-- Personnages attachants et enjeux clairs pour les jeunes lecteurs.`;
+  **Adaptation public "enfant" (6 ans) :**
+  - Vocabulaire simple et phrases courtes.
+  - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+  - Ambiance positive ou aventureuse pour la conclusion.`;
   }
-
-  return prompt;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
@@ -85,6 +84,8 @@ function createNextPrompt(text, history, remainingScenes, public, genre,) {
 - Assure une transition fluide avec les événements précédents en gardant la cohérence de l'intrigue des scènes précédentes: ${history}.
 - Maintiens la progression de l'histoire en tenant compte des choix précédents
 - SURTOUT garde en tête le genre ${genre} pour adapter le ton et les enjeux.
+Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt que l'absurde pur.
+- Si le genre est "comédie", privilégie l'humour **logique et contextuel** (quiproquos, maladresses, dialogues amusants), évite les situations incohérentes, les non-sens ou les blagues absurdes.
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
@@ -106,13 +107,12 @@ function createNextPrompt(text, history, remainingScenes, public, genre,) {
   // Pour l'exemple, j'ajoute une condition générique.
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
   // Pour cette démo, je vais juste simuler la condition si 'public' était disponible.
-  if (history.includes("enfant")) {
-    // C'est une simulation, il faudrait que 'public' soit un vrai paramètre
+  if (public === "enfant") {
     prompt += `
-**Adaptation public "enfant" (6 ans) :**
-- Vocabulaire simple et phrases courtes, jamais de vulgarité.
-- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
-- Ambiance positive ou aventureuse, évitant la complexité ou la violence.`;
+  **Adaptation public "enfant" (6 ans) :**
+  - Vocabulaire simple et phrases courtes.
+  - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+  - Ambiance positive ou aventureuse pour la conclusion.`;
   }
 
   return prompt;
@@ -125,12 +125,16 @@ function createLastPrompt(text, history, public) {
 **Contexte narratif :**
 - Historique des scènes : ${history}
 - Type de fin souhaitée : "${text}"
+- SURTOUT garde en tête le genre ${genre} pour adapter le ton et les enjeux.
+Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt que l'absurde pur.
+- Si le genre est "comédie", privilégie l'humour **logique et contextuel** (quiproquos, maladresses, dialogues amusants), évite les situations incohérentes, les non-sens ou les blagues absurdes.
 
 **Résolution narrative :**
 - Intègre l'orientation de fin "${text}" de manière organique et narrative
 - Ne reproduis pas directement le texte : interprète-le comme une direction créative
 - Résous les conflits et tensions établis dans les scènes précédentes
 - Assure une conclusion cohérente avec l'ensemble de l'histoire
+- Fin **obligatoire** : l’histoire doit être totalement terminée, pas de cliffhanger ni d'ouverture.
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
@@ -144,17 +148,19 @@ function createLastPrompt(text, history, public) {
 - Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
 - Évite les fins abruptes : apporte une vraie conclusion
 
-**Objectif :** Créer une fin mémorable qui donne un sentiment d'accomplissement narratif.`;
+**Objectif :** Créer une fin mémorable avec une vraie conclusion. Tous les conflits doivent être résolus, les personnages doivent atteindre une forme de stabilité ou de transformation. Il ne doit rester **aucune question ouverte**. Le lecteur doit ressentir que **l’histoire est réellement terminée**.`;
 
   // Ajout de la spécificité pour le public "enfant"
   // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
   if (history.includes("enfant")) {
     // Simulation
-    prompt += `
-**Adaptation public "enfant" (6 ans) :**
-- Vocabulaire simple et phrases courtes.
-- Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
-- Ambiance positive ou aventureuse pour la conclusion.`;
+    if (public === "enfant") {
+      prompt += `
+    **Adaptation public "enfant" (6 ans) :**
+    - Vocabulaire simple et phrases courtes.
+    - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
+    - Ambiance positive ou aventureuse pour la conclusion.`;
+    }
   }
 
   return prompt;
