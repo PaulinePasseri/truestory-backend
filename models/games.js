@@ -11,6 +11,7 @@ const gamesSchema = mongoose.Schema({
  nbPlayers: Number,
  nbScenes: Number,
  winner: String,
+ fullstory: String,
  hostId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
  usersId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
 });

@@ -57,6 +57,7 @@ router.post("/create/:token", (req, res) => {
         nbPlayers: req.body.nbPlayers,
         nbScenes: req.body.nbScenes,
         winner: null,
+        fullstory: null,
         hostId: userId,
         usersId: [userId], // Ajout de l'utilisateur créateur de la partie
       });
@@ -161,14 +162,11 @@ router.get("/user/:token", (req, res) => {
     });
 });
 
-// Terminer une partie et ajouter un gagnant
+// Terminer une partie, ajouter un gagnant et l'histoire complète
 router.put('/end/:code/:token', (req, res) => {
   const { code, token } = req.params;
 
-  const updateFields = { status: false };
-  if (token) updateFields.winner = token;
-
-  Games.updateOne({ code }, updateFields)
+  Games.updateOne({ code }, { status: false, winner: token, fullstory: req.body.fullstory})
     .then((game) => {
       if (!game) {
         return res.json({ result: false, error: 'Game not found' });
