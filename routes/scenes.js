@@ -71,7 +71,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
-function createNextPrompt(text, history, remainingScenes, public) {
+function createNextPrompt(text, history, remainingScenes, public, genre,) {
   let prompt = `Écris en français la suite de l'histoire interactive pour les ${public}.
 
 **Contexte narratif :**
@@ -82,7 +82,9 @@ function createNextPrompt(text, history, remainingScenes, public) {
 **Intégration de l'action :**
 - Incorpore naturellement l'action "${text}" dans la continuité narrative
 - Évite la répétition littérale : transforme, interprète ou développe l'idée
-- Assure une transition fluide avec les événements précédents
+- Assure une transition fluide avec les événements précédents en gardant la cohérence de l'intrigue des scènes précédentes: ${history}.
+- Maintiens la progression de l'histoire en tenant compte des choix précédents
+- SURTOUT garde en tête le genre ${genre} pour adapter le ton et les enjeux.
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
