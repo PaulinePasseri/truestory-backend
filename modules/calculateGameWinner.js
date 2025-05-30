@@ -35,6 +35,7 @@ async function calculateGameWinnerByCode(gameCode) {
 
     await Games.findByIdAndUpdate(gameId, {
       winner: winnerUserId.toString(),
+      totalVotes: totalVotes
     });
 
     console.log(`Gagnant défini pour le jeu ${gameCode} : ${winnerUserId}`);

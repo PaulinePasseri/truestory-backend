@@ -60,6 +60,7 @@ router.post("/create/:token", (req, res) => {
         nbScenes: req.body.nbScenes,
         winner: null,
         fullstory: null,
+        totalVotes: null,
         hostId: userId,
         usersId: [userId], // Ajout de l'utilisateur créateur de la partie
       });
@@ -88,14 +89,26 @@ router.put("/start/:code", (req, res) => {
 });
 
 // Récupération des informations de la partie
-router.get("/game/:code", (req, res) => {
-  Games.findOne({ code: req.params.code }).then((game) => {
-    if (game) {
-      res.json({ result: true, game });
-    } else {
-      res.json({ result: false, error: "Game not found" });
+router.get("/game/:code", async (req, res) => {
+  try {
+    const game = await Games.findOne({ code: req.params.code }).populate(
+      "winner"
+    );
+
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
     }
-  });
+
+    const responseGame = {
+      ...game.toObject(),
+      winner: game.winner?.nickname || null, 
+    };
+
+    res.json({ result: true, game: responseGame });
+  } catch (error) {
+    console.error("Erreur GET /game/:code", error);
+    res.status(500).json({ result: false, error: "Server error" });
+  }
 });
 
 // Ajout d'un joueur à une partie
