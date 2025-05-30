@@ -37,19 +37,17 @@ async function generateVoice(text) {
 }
 
 // Fonction pour générer un fichier PDF depuis le texte
-function generatePDF(text, outputPath) {
+async function generatePDF(text, res) {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument();
-      const stream = fs.createWriteStream(outputPath);
-      doc.pipe(stream);
-      doc.fontSize(14).text(text, {
-        align: 'left',
-      });
-      doc.end();
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "attachment; filename=texte.pdf");
 
-      stream.on("finish", () => resolve(outputPath));
-      stream.on("error", (err) => reject(err));
+      doc.pipe(res);
+      doc.fontSize(16).text(text, { align: "left" });
+      doc.end();
+      resolve();
     } catch (err) {
       reject(err);
     }

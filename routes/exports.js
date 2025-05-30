@@ -20,16 +20,12 @@ router.post("/generate", async (req, res) => {
 });
 
 // 📄 Génération PDF (version avec le module propre)
-router.post("/pdf", (req, res) => {
+router.post("/pdf", async (req, res) => {
   const { text } = req.body;
-
   if (!text) return res.status(400).send("Texte requis");
 
   try {
-    const pdfStream = generatePDF(text);
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=texte.pdf");
-    pdfStream.pipe(res);
+    await generatePDF(text, res);
   } catch (err) {
     console.error("Erreur PDF :", err.message);
     res.status(500).send("Erreur PDF");
