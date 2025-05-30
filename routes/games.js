@@ -4,17 +4,19 @@ var router = express.Router();
 const Games = require("../models/games");
 const User = require("../models/users");
 
+const { calculateGameWinnerByCode } = require("../modules/calculateGameWinner");
+
 // Route création de partie
 router.post("/create/:token", (req, res) => {
   User.findOne({ token: req.params.token }).then((user) => {
     if (!user) {
       return res.json({ result: false, error: "Invalid token" });
     }
-    
+
     // Fonction pour générer un code de jeu aléatoire
     function generateGameCode(length = 5) {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      let result = '';
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let result = "";
       for (let i = 0; i < length; i++) {
         result += letters.charAt(Math.floor(Math.random() * letters.length));
       }
@@ -23,7 +25,7 @@ router.post("/create/:token", (req, res) => {
 
     const userId = user._id;
     let gameCode = generateGameCode(5);
-    
+
     // Vérification que le code n'existe pas déjà
     Games.findOne({ code: gameCode }).then((existingGame) => {
       // Si le code existe, on en génère un nouveau
@@ -48,7 +50,7 @@ router.post("/create/:token", (req, res) => {
     function createGame() {
       const newGames = new Games({
         status: true, // true si la partie est en cours
-        started: false, // false si la partie n'a pas encore commencé 
+        started: false, // false si la partie n'a pas encore commencé
         code: gameCode,
         title: req.body.title,
         image: req.body.image,
@@ -58,10 +60,11 @@ router.post("/create/:token", (req, res) => {
         nbScenes: req.body.nbScenes,
         winner: null,
         fullstory: null,
+        totalVotes: null,
         hostId: userId,
         usersId: [userId], // Ajout de l'utilisateur créateur de la partie
       });
-    
+
       newGames.save().then((newDoc) => {
         res.json({
           result: true,
@@ -74,26 +77,38 @@ router.post("/create/:token", (req, res) => {
   });
 });
 
-// Lancement de la partie 
+// Lancement de la partie
 router.put("/start/:code", (req, res) => {
   Games.updateOne({ code: req.params.code }, { started: true }).then((data) => {
     if (data.modifiedCount === 0) {
-      res.json({result: false, message: 'Game not started'})
+      res.json({ result: false, message: "Game not started" });
     } else {
-      res.json({result: true, message: 'Game successfully started'})
-    }
-  })
-})
-
-// Récupération des informations de la partie
-router.get("/game/:code", (req, res) => {
-  Games.findOne({ code: req.params.code }).then((game) => {
-    if (game) {
-      res.json({result: true, game });
-    } else {
-      res.json({ result: false, error: "Game not found" });
+      res.json({ result: true, message: "Game successfully started" });
     }
   });
+});
+
+// Récupération des informations de la partie
+router.get("/game/:code", async (req, res) => {
+  try {
+    const game = await Games.findOne({ code: req.params.code }).populate(
+      "winner"
+    );
+
+    if (!game) {
+      return res.json({ result: false, error: "Game not found" });
+    }
+
+    const responseGame = {
+      ...game.toObject(),
+      winner: game.winner?.nickname || null, 
+    };
+
+    res.json({ result: true, game: responseGame });
+  } catch (error) {
+    console.error("Erreur GET /game/:code", error);
+    res.status(500).json({ result: false, error: "Server error" });
+  }
 });
 
 // Ajout d'un joueur à une partie
@@ -131,7 +146,6 @@ router.post("/join", (req, res) => {
 
 // Récupération des joueurs de la partie
 router.get("/players/:gamecode", (req, res) => {
-  
   Games.findOne({ code: req.params.gamecode })
     .populate("usersId")
     .then((data) => {
@@ -163,16 +177,44 @@ router.get("/user/:token", (req, res) => {
 });
 
 // Terminer une partie, ajouter un gagnant et l'histoire complète
-router.put('/end/:code/:token', (req, res) => {
-  const { code, token } = req.params;
+router.put("/end/:code", async (req, res) => {
+  const { code } = req.params;
+  const { fullstory } = req.body;
 
-  Games.updateOne({ code }, { status: false, winner: token, fullstory: req.body.fullstory})
-    .then((game) => {
-      if (!game) {
-        return res.json({ result: false, error: 'Game not found' });
-      }
-      res.json({ result: true, message: 'Game ended and winner saved' });
-    })
+  try {
+    const gameUpdate = await Games.updateOne(
+      { code },
+      { status: false, fullstory: fullstory }
+    );
+
+    if (gameUpdate.modifiedCount === 0) {
+      return res.json({
+        result: false,
+        error: "Game not found or not updated",
+      });
+    }
+
+    const winnerResult = await calculateGameWinnerByCode(code);
+
+    if (!winnerResult) {
+      return res.json({ result: false, error: "Winner not calculated" });
+    }
+
+    const { winnerUserId, totalVotes } = winnerResult;
+
+    // Récupération du nickname
+    const winnerUser = await User.findById(winnerUserId);
+    const nickname = winnerUser?.nickname || "Utilisateur inconnu";
+
+    res.json({
+      result: true,
+      winner: nickname,
+      totalVotes: totalVotes,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ result: false, error: "Server error" });
+  }
 });
 
 module.exports = router;
