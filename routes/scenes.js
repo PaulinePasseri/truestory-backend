@@ -35,7 +35,7 @@ function createFirstPrompt(title, genre, nbScene, public) {
   let prompt = `Écris le début pour les ${public} d'une histoire interactive en français dans le genre ${genre}, qui donnera le ton et la direction de l'histoire.
 
 **Contexte et Protagonistes :**
-- Décris plus en détail le contexte de l'histoire. Qui sont les personnages principaux ? Donne-leur des **prénoms originaux et variés** (pas de répétition d’une histoire à l’autre)
+- Décris plus en détail le contexte de l'histoire. Qui sont les personnages principaux ? Donne-leur des **prénoms originaux et variés** (pas de répétition d'une histoire à l'autre)
 - Intègre l'idée ou le thème principal du "${title}" de manière organique dans le récit initial.
 
 **Contraintes techniques :**
@@ -67,6 +67,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
   - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
   - Ambiance positive ou aventureuse pour la conclusion.`;
   }
+  return prompt;
 }
 
 // Fonction pour créer le prompt pour les scènes suivantes
@@ -101,12 +102,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
 - Termine par un nouveau cliffhanger : tension, révélation ou dilemme
 
 **Important :** Ne propose AUCUN choix. L'histoire s'arrête sur la tension narrative.`;
-
   // Ajout de la spécificité pour le public "enfant"
-  // Note: Tu devras passer le paramètre 'public' à cette fonction aussi si tu veux qu'elle l'utilise.
-  // Pour l'exemple, j'ajoute une condition générique.
-  // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
-  // Pour cette démo, je vais juste simuler la condition si 'public' était disponible.
   if (public === "enfant") {
     prompt += `
   **Adaptation public "enfant" (6 ans) :**
@@ -149,11 +145,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
 - Évite les fins abruptes : apporte une vraie conclusion
 
 **Objectif :** Créer une fin mémorable avec une vraie conclusion. Tous les conflits doivent être résolus, les personnages doivent atteindre une forme de stabilité ou de transformation. Il ne doit rester **aucune question ouverte**. Le lecteur doit ressentir que **l’histoire est réellement terminée**.`;
-
   // Ajout de la spécificité pour le public "enfant"
-  // Idéalement, 'public' devrait être un paramètre passé ou récupéré du contexte global.
-  if (history.includes("enfant")) {
-    // Simulation
     if (public === "enfant") {
       prompt += `
     **Adaptation public "enfant" (6 ans) :**
@@ -161,7 +153,6 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
     - Thèmes et concepts adaptés à l'âge (pas de peur intense, sujets compréhensibles).
     - Ambiance positive ou aventureuse pour la conclusion.`;
     }
-  }
 
   return prompt;
 }
