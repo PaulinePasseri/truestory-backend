@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { generateVoice } = require("../modules/exports");
+const { generateVoice, generatePDF } = require("../modules/exports");
 
-// Route POST : /exports/generate
+// 🎧 Génération audio
 router.post("/generate", async (req, res) => {
   const { text } = req.body;
 
@@ -10,11 +10,29 @@ router.post("/generate", async (req, res) => {
 
   try {
     const audioStream = await generateVoice(text);
-    res.set({ "Content-Type": "audio/mpeg" });
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Disposition", "attachment; filename=audio.mp3");
     audioStream.pipe(res);
   } catch (err) {
     console.error("Erreur ElevenLabs :", err.message);
-    res.status(500).send(err.message);
+    res.status(500).send("Erreur audio");
+  }
+});
+
+// 📄 Génération PDF (version avec le module propre)
+router.post("/pdf", (req, res) => {
+  const { text } = req.body;
+
+  if (!text) return res.status(400).send("Texte requis");
+
+  try {
+    const pdfStream = generatePDF(text);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=texte.pdf");
+    pdfStream.pipe(res);
+  } catch (err) {
+    console.error("Erreur PDF :", err.message);
+    res.status(500).send("Erreur PDF");
   }
 });
 

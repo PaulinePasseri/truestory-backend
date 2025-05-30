@@ -1,8 +1,15 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
+// Fonction pour générer le fichier audio depuis ElevenLabs
 async function generateVoice(text) {
   const API_KEY = process.env.ELEVEN_API_KEY;
   const VOICE_ID = process.env.VOICE_ID;
+
+  if (!API_KEY || !VOICE_ID) {
+    throw new Error("Clé API ou Voice ID manquant");
+  }
 
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
     method: "POST",
@@ -26,7 +33,27 @@ async function generateVoice(text) {
     throw new Error("Erreur ElevenLabs : " + errorText);
   }
 
-  return response.body;
+  return response.body; // flux audio
 }
 
-module.exports = { generateVoice };
+// Fonction pour générer un fichier PDF depuis le texte
+function generatePDF(text, outputPath) {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument();
+      const stream = fs.createWriteStream(outputPath);
+      doc.pipe(stream);
+      doc.fontSize(14).text(text, {
+        align: 'left',
+      });
+      doc.end();
+
+      stream.on("finish", () => resolve(outputPath));
+      stream.on("error", (err) => reject(err));
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+module.exports = { generateVoice, generatePDF };
