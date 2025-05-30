@@ -119,7 +119,6 @@ router.put('/profile/nickname', (req, res) => {
 router.get("/:token", (req, res) => {
   User.findOne({ token: req.params.token }).then((user) => {
     if (user) {
-      console.log(user);
       res.json({ result: true, user });
     } else {
       res.json({ result: false, error: "User not found" });

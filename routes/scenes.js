@@ -348,8 +348,6 @@ router.put("/status/:code/:sceneNumber", async (req, res) => {
   const { code, sceneNumber } = req.params;
 
   try {
-    console.log(`PUT Status - Code: ${code}, Scene: ${sceneNumber}`);
-
     if (!code || !sceneNumber) {
       return res.json({
         result: false,
@@ -387,8 +385,6 @@ router.put("/status/:code/:sceneNumber", async (req, res) => {
         });
       }
     }
-
-    console.log("Statut modifié avec succès");
     return res.json({ result: true, message: "Scene status updated to false" });
   } catch (error) {
     console.error("Erreur PUT status:", error);
@@ -401,8 +397,6 @@ router.get("/status/:code/:sceneNumber", async (req, res) => {
   const { code, sceneNumber } = req.params;
 
   try {
-    console.log(`GET Status - Code: ${code}, Scene: ${sceneNumber}`);
-
     if (!code || !sceneNumber) {
       return res.json({
         result: false,
@@ -423,7 +417,6 @@ router.get("/status/:code/:sceneNumber", async (req, res) => {
     if (!scene) {
       return res.json({ result: false, error: "Scene not found" });
     }
-    console.log(scene.status);
     return res.json({
       result: true,
       data: {
@@ -440,8 +433,6 @@ router.get("/status/:code/:sceneNumber", async (req, res) => {
 //Route pour récupérer une scène et ses propositions
 router.get("/code/:code/scene/:sceneNumber", (req, res) => {
   const { code, sceneNumber } = req.params;
-  console.log("PARAMS:", code, sceneNumber);
-
   if (!code || !sceneNumber) {
     return res.json({ result: false, error: "Code and sceneNumber required" });
   }
@@ -451,8 +442,7 @@ router.get("/code/:code/scene/:sceneNumber", (req, res) => {
       if (!game) {
         return res.json({ result: false, error: "Game not found" });
       }
-
-      console.log(game._id, typeof game._id);
+      
       return Scenes.findOne({
         game: game._id,
         sceneNumber: Number(sceneNumber),
