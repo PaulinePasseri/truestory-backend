@@ -115,7 +115,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
 }
 
 // Fonction pour créer le prompt de la dernière scène
-function createLastPrompt(text, history, public) {
+function createLastPrompt(text, history, public,genre) {
   let prompt = `Écris en français la conclusion définitive de l'histoire interactive pour les ${public}.
 
 **Contexte narratif :**
@@ -130,7 +130,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
 - Ne reproduis pas directement le texte : interprète-le comme une direction créative
 - Résous les conflits et tensions établis dans les scènes précédentes
 - Assure une conclusion cohérente avec l'ensemble de l'histoire
-- Fin **obligatoire** : l’histoire doit être totalement terminée, pas de cliffhanger ni d'ouverture.
+- Fin **obligatoire** : l'histoire doit être totalement terminée, pas de cliffhanger ni d'ouverture.
 
 **Contraintes techniques :**
 - Longueur : 400-600 caractères maximum
@@ -144,7 +144,7 @@ Pour la comédie, privilégie l'humour situationnel et des enjeux clairs plutôt
 - Narration à la 3e personne (le lecteur suit l'histoire, il n'est pas protagoniste)
 - Évite les fins abruptes : apporte une vraie conclusion
 
-**Objectif :** Créer une fin mémorable avec une vraie conclusion. Tous les conflits doivent être résolus, les personnages doivent atteindre une forme de stabilité ou de transformation. Il ne doit rester **aucune question ouverte**. Le lecteur doit ressentir que **l’histoire est réellement terminée**.`;
+**Objectif :** Créer une fin mémorable avec une vraie conclusion. Tous les conflits doivent être résolus, les personnages doivent atteindre une forme de stabilité ou de transformation. Il ne doit rester **aucune question ouverte**. Le lecteur doit ressentir que **l'histoire est réellement terminée**.`;
   // Ajout de la spécificité pour le public "enfant"
     if (public === "enfant") {
       prompt += `
