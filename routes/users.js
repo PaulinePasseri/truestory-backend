@@ -11,6 +11,9 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const uniqid = require("uniqid");
 
+
+//Route pour creer un utilisateur
+
 router.post("/signup", (req, res) => {
   if (!checkBody(req.body, ["email", "password"])) {
     res.json({ result: false, error: "Missing or empty fields" });
@@ -59,6 +62,7 @@ router.post("/signin", (req, res) => {
   });
 });
 
+// Route pour mettre à jour le profil de l'utilisateur
 router.put("/profile", (req, res) => {
   User.findOne({ token: req.body.token }).then((user) => {
     if (!user) {
@@ -115,6 +119,8 @@ router.put('/profile/nickname', (req, res) => {
     }
   })
 })
+
+//Rotue pour obtenir les informations d'un utilisateur par son token
 
 router.get("/:token", (req, res) => {
   User.findOne({ token: req.params.token }).then((user) => {
