@@ -8,9 +8,6 @@ const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 
 const cloudinary = require("cloudinary").v2;
-const fs = require("fs");
-const uniqid = require("uniqid");
-
 
 //Route pour creer un utilisateur
 
@@ -62,6 +59,10 @@ router.post("/signin", (req, res) => {
   });
 });
 
+function uploadBase64Image(base64Data, callback) {
+  cloudinary.uploader.upload(base64Data, { folder: "avatars" }, callback);
+}
+
 // Route pour mettre à jour le profil de l'utilisateur
 router.put("/profile", (req, res) => {
   User.findOne({ token: req.body.token }).then((user) => {
@@ -72,30 +73,16 @@ router.put("/profile", (req, res) => {
 
     user.nickname = req.body.nickname;
 
-    if (req.files && req.files.photoFromFront) {
-      const photoPath = `./tmp/${uniqid()}.jpg`;
-      const tmpDir = "./tmp";
-      if (!fs.existsSync(tmpDir)) {
-        fs.mkdirSync(tmpDir);
-      }
-      req.files.photoFromFront.mv(photoPath, (err) => {
-        if (err) {
-          res.json({ result: false, error: "File upload failed" });
+    if (req.body.base64Image) {
+      uploadBase64Image(req.body.base64Image, (error, resultCloudinary) => {
+        if (error) {
+          res.json({ result: false, error: "Cloudinary upload failed" });
           return;
         }
 
-        cloudinary.uploader.upload(photoPath, (error, resultCloudinary) => {
-          fs.unlinkSync(photoPath);
-
-          if (error) {
-            res.json({ result: false, error: "Cloudinary upload failed" });
-            return;
-          }
-
-          user.avatar = resultCloudinary.secure_url;
-          user.save().then(() => {
-            res.json({ result: true, url: resultCloudinary.secure_url });
-          });
+        user.avatar = resultCloudinary.secure_url;
+        user.save().then(() => {
+          res.json({ result: true, url: resultCloudinary.secure_url });
         });
       });
     } else if (req.body.avatarUrl) {
@@ -104,10 +91,11 @@ router.put("/profile", (req, res) => {
         res.json({ result: true, url: req.body.avatarUrl });
       });
     } else {
-      res.json({ result: false, error: "No image or avatar provided" });
+      res.json({ result: false, error: "No image provided" });
     }
   });
 });
+
 
 router.put('/profile/nickname', (req, res) => {
   const { nickname, token } = req.body
