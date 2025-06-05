@@ -9,6 +9,7 @@ it("GET /games/game/MOXHF", async () => {
   expect(res.body.game).toEqual({
     _id: "68348d6f83f06f5e3751e371",
     status: true,
+    started: false,
     code: "MOXHF",
     title: "Ville",
     image:
@@ -16,7 +17,9 @@ it("GET /games/game/MOXHF", async () => {
     genre: "Action",
     nbPlayers: 3,
     nbScenes: 8,
+    fullstory: null,
     winner: null,
+    totalVotes: null,
     usersId: ["682d9a48b818070dd37cdd60"],
     __v: 0,
   });
